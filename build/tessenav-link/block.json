@@ -1,0 +1,91 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "sagiriswd/tessenav-link",
+  "title": "TesseNav Link",
+  "category": "design",
+  "parent": [
+    "sagiriswd/tessenav"
+  ],
+  "allowedBlocks": [
+    "sagiriswd/tessenav-link",
+    "sagiriswd/tessenav-submenu"
+  ],
+  "description": "Add a custom link to TesseNav.",
+  "attributes": {
+    "label": {
+      "type": "string",
+      "role": "content"
+    },
+    "type": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "rel": {
+      "type": "string"
+    },
+    "id": {
+      "type": "number"
+    },
+    "opensInNewTab": {
+      "type": "boolean",
+      "default": false
+    },
+    "url": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string"
+    },
+    "isTopLevelLink": {
+      "type": "boolean"
+    }
+  },
+  "usesContext": [
+    "textColor",
+    "customTextColor",
+    "backgroundColor",
+    "customBackgroundColor",
+    "overlayTextColor",
+    "customOverlayTextColor",
+    "overlayBackgroundColor",
+    "customOverlayBackgroundColor",
+    "fontSize",
+    "customFontSize",
+    "showSubmenuIcon",
+    "maxNestingLevel",
+    "style"
+  ],
+  "supports": {
+    "reusable": false,
+    "html": false,
+    "__experimentalSlashInserter": true,
+    "typography": {
+      "fontSize": true,
+      "lineHeight": true,
+      "__experimentalFontFamily": true,
+      "__experimentalFontWeight": true,
+      "__experimentalFontStyle": true,
+      "__experimentalTextTransform": true,
+      "__experimentalTextDecoration": true,
+      "__experimentalLetterSpacing": true,
+      "__experimentalDefaultControls": {
+        "fontSize": true
+      }
+    },
+    "renaming": false,
+    "interactivity": {
+      "clientNavigation": true
+    }
+  },
+  "textdomain": "sagiriswd",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "viewScript": "file:./view.js"
+}

@@ -1,0 +1,32 @@
+@use "@wordpress/base-styles/variables" as v;
+@use "@wordpress/base-styles/colors" as c;
+// Navigation item styles.
+// Contains styles only that are unique to the manually inserted menu item.
+// Styles in the Navigation block itself target both custom menu items, and
+// those from the Page List block.
+.sagiriswd-tn {
+	// This wraps just the innermost text for custom menu items.
+	.sagiriswd-tn-item__label {
+		overflow-wrap: break-word;
+	}
+
+	// Hide the description by default.
+	// If a theme opts-in to show descriptions, they will need to provide styles for them.
+	.sagiriswd-tn-item__description {
+		display: none;
+	}
+}
+
+.link-ui-tools {
+	outline: 1px solid c.$gray-100;
+	padding: v.$grid-unit-10;
+}
+
+.link-ui-block-inserter {
+	padding-top: v.$grid-unit-10;
+}
+
+.link-ui-block-inserter__back {
+	margin-left: v.$grid-unit-10;
+	text-transform: uppercase;
+}

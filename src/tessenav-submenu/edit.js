@@ -28,7 +28,7 @@ import { useState, useEffect, useRef } from '@wordpress/element';
 import { link as linkIcon, removeSubmenu } from '@wordpress/icons';
 import { speak } from '@wordpress/a11y';
 import { createBlock } from '@wordpress/blocks';
-import { useMergeRefs, usePrevious } from '@wordpress/compose';
+import { useMergeRefs, usePrevious, useResizeObserver } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -131,7 +131,18 @@ export default function Edit( {
 	context,
 	clientId,
 } ) {
-	const { label, url, description, title, id, kind, type, rel, opensInNewTab, isTopLevelLink } = attributes;
+	const {
+		label,
+		url,
+		description,
+		title,
+		id,
+		kind,
+		type,
+		rel,
+		opensInNewTab,
+		isTopLevelLink
+	} = attributes;
 
 	const { showSubmenuIcon, maxNestingLevel, openSubmenusOnClick } = context;
 
@@ -159,7 +170,8 @@ export default function Edit( {
 		hasChildren,
 		selectedBlockHasChildren,
 		onlyDescendantIsEmptyLink,
-		isParentSelected
+		isParentSelected,
+		isInSecondHalf
 	} = useSelect(
 		( select ) => {
 			const {
@@ -167,8 +179,9 @@ export default function Edit( {
 				getSelectedBlockClientId,
 				getBlockParentsByBlockName,
 				getBlock,
+				getBlockIndex,
 				getBlockCount,
-				getBlockOrder,
+				getBlockOrder
 			} = select( blockEditorStore );
 
 			let _onlyDescendantIsEmptyLink;
@@ -188,13 +201,22 @@ export default function Edit( {
 					! singleBlock?.attributes?.content;
 			}
 
+			let isInSecondHalf = false;
+
+			const parentBlock = getBlockParentsByBlockName(clientId, 'sagiriswd/tessenav');
+
+			if ( parentBlock.length >= 1 ) {
+				const desktop = window.innerWidth >= 600;
+				const pid = parentBlock[0];
+				const childCount = getBlockCount(pid);
+				const index = getBlockIndex( clientId ) + 1;
+				isInSecondHalf = desktop && childCount > 2  && ( childCount / index ) < 1.5 ? true : false;
+			}
+
 			return {
 				parentCount: getBlockParentsByBlockName(
 					clientId,
 					'sagiriswd/tessenav-submenu'
-
-
-
 				).length,
 				isParentOfSelectedBlock: hasSelectedInnerBlock(
 					clientId,
@@ -207,11 +229,15 @@ export default function Edit( {
 				hasChildren: !! getBlockCount( clientId ),
 				selectedBlockHasChildren: !! selectedBlockChildren?.length,
 				onlyDescendantIsEmptyLink: _onlyDescendantIsEmptyLink,
-				isParentSelected: selectedBlockId === clientId
+				isParentSelected: selectedBlockId === clientId,
+				isInSecondHalf: isInSecondHalf
 			};
 		},
 		[ clientId ]
 	);
+	useEffect( () => {
+		setAttributes( { isInSecondHalf: isInSecondHalf } );
+	}, [ attributes[ 'isInSecondHalf' ] ] )
 
 	const prevHasChildren = usePrevious( hasChildren );
 
@@ -327,9 +353,25 @@ export default function Edit( {
 		onKeyDown,
 	} );
 
-	// Always use overlay colors for submenus.
-	const innerBlocksColors = getColors( context, true );
+	const btnStyles = {
+		color: ! textColor && customTextColor,
+		backgroundColor: ! backgroundColor && customBackgroundColor,
+	};
 
+	// Always use overlay colors for submenus.
+	const innerBlocksColors = getColors( attributes, true );
+
+
+	// Set anchor positions for submenus
+	const pos = isInSecondHalf
+							? {
+								left: 'revert',
+								right: '0px'
+							} : {
+								right: 'revert',
+								left: '0px'
+							};
+	const innerProps = { innerBlocksColors, ...pos };
 	const allowedBlocks =
 		parentCount >= maxNestingLevel
 			? ALLOWED_BLOCKS.filter(
@@ -345,8 +387,10 @@ export default function Edit( {
 			: ALLOWED_BLOCKS;
 
 	const submenuChildBlockProps =
-		getSubmenuChildBlockProps( innerBlocksColors );
-	const innerBlocksProps = useInnerBlocksProps( submenuChildBlockProps, {
+		getSubmenuChildBlockProps( innerProps );
+	const innerBlocksProps = useInnerBlocksProps(
+		submenuChildBlockProps,
+		{
 		allowedBlocks,
 		defaultBlock: DEFAULT_BLOCK,
 		directInsert: true,
@@ -357,13 +401,8 @@ export default function Edit( {
 		__experimentalCaptureToolbars: true,
 
 		renderAppender:
-			// isSelected
-			// ||
 			( ! isImmediateParentOfSelectedBlock &&
 				isParentSelected )
-				// ||
-			// Show the appender while dragging to allow inserting element between item and the appender.
-			// hasChildren
 				? InnerBlocks.ButtonBlockAppender
 				: false,
 	} );
@@ -427,7 +466,7 @@ export default function Edit( {
 					/>
 				</ToolbarGroup>
 			</BlockControls>
-			<InspectorControls>
+			<InspectorControls group="settings">
 				<Controls
 					attributes={ attributes }
 					setAttributes={ setAttributes }
@@ -456,6 +495,7 @@ export default function Edit( {
 								setOpenedBy( ref.current );
 							}
 						} }
+						style={ btnStyles }
 					/>
 					{ description && (
 						<span className="sagiriswd-tn-item__description">

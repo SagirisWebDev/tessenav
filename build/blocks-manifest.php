@@ -110,13 +110,16 @@ return array(
 			'maxNestingLevel' => 'maxNestingLevel'
 		),
 		'supports' => array(
-			'align' => array(
-				'wide',
-				'full'
-			),
+			'align' => true,
+			'anchor' => true,
 			'ariaLabel' => true,
 			'html' => false,
-			'inserter' => true,
+			'color' => array(
+				'button' => true,
+				'gradients' => true,
+				'heading' => true,
+				'link' => true
+			),
 			'typography' => array(
 				'fontSize' => true,
 				'lineHeight' => true,
@@ -134,27 +137,38 @@ return array(
 				)
 			),
 			'spacing' => array(
-				'blockGap' => true,
-				'units' => array(
-					'px',
-					'em',
-					'rem',
-					'vh',
-					'vw'
-				),
-				'__experimentalDefaultControls' => array(
-					'blockGap' => true
-				)
+				'margin' => true,
+				'padding' => true,
+				'blockGap' => true
 			),
 			'layout' => array(
 				'allowSwitching' => false,
-				'allowInheriting' => false,
-				'allowVerticalAlignment' => false,
+				'allowInheriting' => true,
+				'allowEditing' => true,
+				'allowCustomContentAndWideSize' => true,
+				'allowJustification' => true,
+				'allowOrientation' => true,
+				'allowVerticalAlignment' => true,
 				'allowSizingOnChildren' => true,
 				'default' => array(
 					'type' => 'flex'
 				)
 			),
+			'background' => array(
+				'backgroundImage' => true,
+				'backgroundSize' => true
+			),
+			'dimensions' => array(
+				'aspectRatio' => false,
+				'minHeight' => true
+			),
+			'filter' => array(
+				'duotone' => true
+			),
+			'position' => array(
+				'sticky' => true
+			),
+			'shadow' => true,
 			'interactivity' => true,
 			'renaming' => false,
 			'contentRole' => true
@@ -163,7 +177,8 @@ return array(
 		'editorScript' => 'file:./index.js',
 		'editorStyle' => 'file:./index.css',
 		'style' => 'file:./style-index.css',
-		'viewScript' => 'file:./view.js'
+		'render' => 'file:./render.php',
+		'viewScriptModule' => 'file:./view.js'
 	),
 	'tessenav-link' => array(
 		'$schema' => 'https://schemas.wp.org/trunk/block.json',
@@ -292,6 +307,9 @@ return array(
 			'type' => array(
 				'type' => 'string'
 			),
+			'kind' => array(
+				'type' => 'string'
+			),
 			'opensInNewTab' => array(
 				'type' => 'boolean',
 				'default' => false
@@ -302,52 +320,19 @@ return array(
 			'title' => array(
 				'type' => 'string'
 			),
-			'kind' => array(
-				'type' => 'string'
-			),
-			'flyoutDirection' => array(
-				'type' => 'string',
-				'enum' => array(
-					'right',
-					'left'
-				),
-				'default' => 'right'
-			),
-			'panelWidth' => array(
-				'type' => 'string',
-				'enum' => array(
-					'auto',
-					'match',
-					'custom'
-				),
-				'default' => 'auto'
+			'isTopLevelItem' => array(
+				'type' => 'boolean'
 			),
 			'customPanelWidth' => array(
 				'type' => 'number',
 				'default' => 0
 			),
-			'columns' => array(
-				'type' => 'number',
-				'default' => 3
-			),
-			'stackAt' => array(
-				'type' => 'string',
-				'enum' => array(
-					'mobile',
-					'tablet',
-					'never'
-				),
-				'default' => 'mobile'
-			),
-			'isTopLevelItem' => array(
-				'type' => 'boolean'
+			'isInSecondHalf' => array(
+				'type' => 'boolean',
+				'default' => false
 			)
 		),
 		'usesContext' => array(
-			'textColor',
-			'customTextColor',
-			'backgroundColor',
-			'customBackgroundColor',
 			'overlayTextColor',
 			'customOverlayTextColor',
 			'overlayBackgroundColor',
@@ -356,11 +341,18 @@ return array(
 			'customFontSize',
 			'showSubmenuIcon',
 			'maxNestingLevel',
-			'openSubmenusOnClick',
-			'style'
+			'openSubmenusOnClick'
+		),
+		'providesContext' => array(
+			'style' => 'style',
+			'textColor' => 'style.color.text',
+			'backgroundColor' => 'style.color.background',
+			'linkColor' => 'style.elements.link.color.text',
+			'gradientColor' => 'style.color.gradient'
 		),
 		'supports' => array(
-			'reusable' => false,
+			'anchor' => true,
+			'align' => true,
 			'html' => false,
 			'typography' => array(
 				'fontSize' => true,
@@ -375,6 +367,38 @@ return array(
 					'fontSize' => true
 				)
 			),
+			'color' => array(
+				'__experimentalDefaultControls' => array(
+					'text' => true,
+					'background' => true
+				),
+				'gradients' => true,
+				'button' => true,
+				'link' => true,
+				'heading' => true
+			),
+			'layout' => array(
+				'default' => array(
+					'type' => 'flex'
+				),
+				'allowSizingOnChildren' => true
+			),
+			'background' => array(
+				'backgroundImage' => true,
+				'backgroundSize' => true
+			),
+			'filter' => array(
+				'duotone' => true
+			),
+			'position' => array(
+				'sticky' => true
+			),
+			'spacing' => array(
+				'margin' => true,
+				'padding' => true,
+				'blockGap' => true
+			),
+			'shadow' => true,
 			'interactivity' => array(
 				'clientNavigation' => true
 			)
@@ -383,6 +407,7 @@ return array(
 		'editorScript' => 'file:./index.js',
 		'editorStyle' => 'file:./index.css',
 		'style' => 'file:./style-index.css',
-		'viewScript' => 'file:./view.js'
+		'render' => 'file:./render.php',
+		'viewScriptModule' => 'file:./view.js'
 	)
 );

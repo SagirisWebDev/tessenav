@@ -32,6 +32,9 @@
     "type": {
       "type": "string"
     },
+    "kind": {
+      "type": "string"
+    },
     "opensInNewTab": {
       "type": "boolean",
       "default": false
@@ -42,52 +45,19 @@
     "title": {
       "type": "string"
     },
-    "kind": {
-      "type": "string"
-    },
-    "flyoutDirection": {
-      "type": "string",
-      "enum": [
-        "right",
-        "left"
-      ],
-      "default": "right"
-    },
-    "panelWidth": {
-      "type": "string",
-      "enum": [
-        "auto",
-        "match",
-        "custom"
-      ],
-      "default": "auto"
+    "isTopLevelItem": {
+      "type": "boolean"
     },
     "customPanelWidth": {
       "type": "number",
       "default": 0
     },
-    "columns": {
-      "type": "number",
-      "default": 3
-    },
-    "stackAt": {
-      "type": "string",
-      "enum": [
-        "mobile",
-        "tablet",
-        "never"
-      ],
-      "default": "mobile"
-    },
-    "isTopLevelItem": {
-      "type": "boolean"
+    "isInSecondHalf": {
+      "type": "boolean",
+      "default": false
     }
   },
   "usesContext": [
-    "textColor",
-    "customTextColor",
-    "backgroundColor",
-    "customBackgroundColor",
     "overlayTextColor",
     "customOverlayTextColor",
     "overlayBackgroundColor",
@@ -96,11 +66,18 @@
     "customFontSize",
     "showSubmenuIcon",
     "maxNestingLevel",
-    "openSubmenusOnClick",
-    "style"
+    "openSubmenusOnClick"
   ],
+  "providesContext": {
+    "style": "style",
+    "textColor": "style.color.text",
+    "backgroundColor": "style.color.background",
+    "linkColor": "style.elements.link.color.text",
+    "gradientColor": "style.color.gradient"
+  },
   "supports": {
-    "reusable": false,
+    "anchor": true,
+    "align": true,
     "html": false,
     "typography": {
       "fontSize": true,
@@ -115,6 +92,38 @@
         "fontSize": true
       }
     },
+    "color": {
+      "__experimentalDefaultControls": {
+        "text": true,
+        "background": true
+      },
+      "gradients": true,
+      "button": true,
+      "link": true,
+      "heading": true
+    },
+    "layout": {
+      "default": {
+        "type": "flex"
+      },
+      "allowSizingOnChildren": true
+    },
+    "background": {
+      "backgroundImage": true,
+      "backgroundSize": true
+    },
+    "filter": {
+      "duotone": true
+    },
+    "position": {
+      "sticky": true
+    },
+    "spacing": {
+      "margin": true,
+      "padding": true,
+      "blockGap": true
+    },
+    "shadow": true,
     "interactivity": {
       "clientNavigation": true
     }
@@ -123,5 +132,6 @@
   "editorScript": "file:./index.js",
   "editorStyle": "file:./index.css",
   "style": "file:./style-index.css",
-  "viewScript": "file:./view.js"
+  "render": "file:./render.php",
+  "viewScriptModule": "file:./view.js"
 }

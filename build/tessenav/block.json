@@ -105,13 +105,16 @@
     "maxNestingLevel": "maxNestingLevel"
   },
   "supports": {
-    "align": [
-      "wide",
-      "full"
-    ],
+    "align": true,
+    "anchor": true,
     "ariaLabel": true,
     "html": false,
-    "inserter": true,
+    "color": {
+      "button": true,
+      "gradients": true,
+      "heading": true,
+      "link": true
+    },
     "typography": {
       "fontSize": true,
       "lineHeight": true,
@@ -129,27 +132,38 @@
       }
     },
     "spacing": {
-      "blockGap": true,
-      "units": [
-        "px",
-        "em",
-        "rem",
-        "vh",
-        "vw"
-      ],
-      "__experimentalDefaultControls": {
-        "blockGap": true
-      }
+      "margin": true,
+      "padding": true,
+      "blockGap": true
     },
     "layout": {
       "allowSwitching": false,
-      "allowInheriting": false,
-      "allowVerticalAlignment": false,
+      "allowInheriting": true,
+      "allowEditing": true,
+      "allowCustomContentAndWideSize": true,
+      "allowJustification": true,
+      "allowOrientation": true,
+      "allowVerticalAlignment": true,
       "allowSizingOnChildren": true,
       "default": {
         "type": "flex"
       }
     },
+    "background": {
+      "backgroundImage": true,
+      "backgroundSize": true
+    },
+    "dimensions": {
+      "aspectRatio": false,
+      "minHeight": true
+    },
+    "filter": {
+      "duotone": true
+    },
+    "position": {
+      "sticky": true
+    },
+    "shadow": true,
     "interactivity": true,
     "renaming": false,
     "contentRole": true
@@ -158,5 +172,6 @@
   "editorScript": "file:./index.js",
   "editorStyle": "file:./index.css",
   "style": "file:./style-index.css",
-  "viewScript": "file:./view.js"
+  "render": "file:./render.php",
+  "viewScriptModule": "file:./view.js"
 }

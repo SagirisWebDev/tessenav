@@ -1,45 +1,42 @@
 <?php
 /**
- * Server-side rendering of the `core/navigation-submenu` block.
+ * PHP file to use when rendering the block type on the server to show on the front end.
  *
- * @package WordPress
+ * The following variables are exposed to the file:
+ *     $attributes (array): The block attributes.
+ *     $content (string): The block default content.
+ *     $block (WP_Block): The block instance.
+ *
+ * @see https://github.com/WordPress/gutenberg/blob/trunk/docs/reference-guides/block-api/block-metadata.md#render
  */
-
-/**
- * Build an array with CSS classes and inline styles defining the font sizes
- * which will be applied to the navigation markup in the front-end.
- *
- * @since 5.9.0
- *
- * @param  array $context Navigation block context.
- * @return array Font size CSS classes and inline styles.
- */
-function sagiriswd_tessenav_submenu_build_css_font_sizes( $context ) {
-	// CSS classes.
-	$font_sizes = array(
-		'css_classes'   => array(),
-		'inline_styles' => '',
-	);
-
-	$has_named_font_size  = array_key_exists( 'fontSize', $context );
-	$has_custom_font_size = isset( $context['style']['typography']['fontSize'] );
-
-	if ( $has_named_font_size ) {
-		// Add the font size class.
-		$font_sizes['css_classes'][] = sprintf( 'has-%s-font-size', $context['fontSize'] );
-	} elseif ( $has_custom_font_size ) {
-		// Add the custom font size inline style.
-		$font_sizes['inline_styles'] = sprintf(
-			'font-size: %s;',
-			wp_get_typography_font_size_value(
-				array(
-					'size' => $context['style']['typography']['fontSize'],
-				)
-			)
+if ( ! function_exists( 'sagiriswd_tessenav_submenu_build_css_font_sizes') ) {
+	function sagiriswd_tessenav_submenu_build_css_font_sizes( $context ) {
+		// CSS classes.
+		$font_sizes = array(
+			'css_classes'   => array(),
+			'inline_styles' => '',
 		);
+	
+		$has_named_font_size  = array_key_exists( 'fontSize', $context );
+		$has_custom_font_size = isset( $context['style']['typography']['fontSize'] );
+	
+		if ( $has_named_font_size ) {
+			// Add the font size class.
+			$font_sizes['css_classes'][] = sprintf( 'has-%s-font-size', $context['fontSize'] );
+		} elseif ( $has_custom_font_size ) {
+			// Add the custom font size inline style.
+			$font_sizes['inline_styles'] = sprintf(
+				'font-size: %s;',
+				wp_get_typography_font_size_value(
+					array(
+						'size' => $context['style']['typography']['fontSize'],
+					)
+				)
+			);
+		}
+	
+		return $font_sizes;
 	}
-
-	return $font_sizes;
 }
 
 /**
@@ -49,22 +46,12 @@ function sagiriswd_tessenav_submenu_build_css_font_sizes( $context ) {
  *
  * @return string
  */
-function sagiriswd_tessenav_submenu_render_submenu_icon() {
-	return '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg>';
+if ( ! function_exists( 'sagiriswd_tessenav_submenu_render_submenu_icon') ) {
+	function sagiriswd_tessenav_submenu_render_submenu_icon() {
+		return '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg>';
+	}
 }
 
-/**
- * Renders the `sagiriswd/tessenav-submenu` block.
- *
- * @since 5.9.0
- *
- * @param array    $attributes The block attributes.
- * @param string   $content    The saved content.
- * @param WP_Block $block      The parsed block.
- *
- * @return string Returns the post content with the legacy widget added.
- */
-function render_sagiriswd_tessenav_submenu( $attributes, $content, $block ) {
 	$navigation_link_has_id = isset( $attributes['id'] ) && is_numeric( $attributes['id'] );
 	$is_post_type           = isset( $attributes['kind'] ) && 'post-type' === $attributes['kind'];
 	$is_post_type           = $is_post_type || isset( $attributes['type'] ) && ( 'post' === $attributes['type'] || 'page' === $attributes['type'] );
@@ -82,7 +69,8 @@ function render_sagiriswd_tessenav_submenu( $attributes, $content, $block ) {
 	$font_sizes      = sagiriswd_tessenav_submenu_build_css_font_sizes( $block->context );
 	$style_attribute = $font_sizes['inline_styles'];
 
-	$has_submenu = count( $block->inner_blocks ) > 0;
+	$inner_blocks = $block->inner_blocks;
+	$has_submenu = count( $inner_blocks ) > 0;
 	$kind        = empty( $attributes['kind'] ) ? 'post_type' : str_replace( '-', '_', $attributes['kind'] );
 	$is_active   = ! empty( $attributes['id'] ) && get_queried_object_id() === (int) $attributes['id'] && ! empty( get_queried_object()->$kind );
 
@@ -99,12 +87,13 @@ function render_sagiriswd_tessenav_submenu( $attributes, $content, $block ) {
 		$show_submenu_indicators;
 
 	$classes = array(
-		'sagiriswd-tessenav-submenu-item',
+		'sagiriswd-tn-submenu',
 	);
 	$classes = array_merge(
 		$classes,
 		$font_sizes['css_classes']
 	);
+
 	if ( $has_submenu ) {
 		$classes[] = 'has-child';
 	}
@@ -137,14 +126,14 @@ function render_sagiriswd_tessenav_submenu( $attributes, $content, $block ) {
 		wp_strip_all_tags( $label )
 	);
 
-	$html = '<li ' . $wrapper_attributes . '>';
+	$html = '<div ' . $wrapper_attributes . '>';
 
 	// If Submenus open on hover, we render an anchor tag with attributes.
 	// If submenu icons are set to show, we also render a submenu button, so the submenu can be opened on click.
 	if ( ! $open_on_click ) {
 		$item_url = isset( $attributes['url'] ) ? $attributes['url'] : '';
 		// Start appending HTML attributes to anchor tag.
-		$html .= '<a class="sagiriswd-tessenav-submenu-item__content"';
+		$html .= '<a class="sagiriswd-tn-item__content"';
 
 		// The href attribute on a and area elements is not required;
 		// when those elements do not have href attributes they do not create hyperlinks.
@@ -176,13 +165,13 @@ function render_sagiriswd_tessenav_submenu( $attributes, $content, $block ) {
 		$html .= '>';
 		// End appending HTML attributes to anchor tag.
 
-		$html .= '<span class="sagiriswd-tessenav-submenu-item__label">';
+		$html .= '<span class="sagiriswd-tn-item__label">';
 		$html .= $label;
 		$html .= '</span>';
 
 		// Add description if available.
 		if ( ! empty( $attributes['description'] ) ) {
-			$html .= '<span class="sagiriswd-tessenav-submenu-item__description">';
+			$html .= '<span class="sagiriswd-tn-item__description">';
 			$html .= wp_kses_post( $attributes['description'] );
 			$html .= '</span>';
 		}
@@ -193,14 +182,14 @@ function render_sagiriswd_tessenav_submenu( $attributes, $content, $block ) {
 		if ( $show_submenu_indicators ) {
 			// The submenu icon is rendered in a button here
 			// so that there's a clickable element to open the submenu.
-			$html .= '<button aria-label="' . esc_attr( $aria_label ) . '" class="sagiriswd-tessenav-submenu__submenu-icon sagiriswd-tessenav-submenu-submenu__toggle" aria-expanded="false">' . sagiriswd_tessenav_submenu_render_submenu_icon() . '</button>';
+			$html .= '<button aria-label="' . esc_attr( $aria_label ) . '" class="sagiriswd-tn__submenu-icon sagiriswd-tn-submenu__toggle" aria-expanded="false">' . sagiriswd_tessenav_submenu_render_submenu_icon() . '</button>';
 		}
 	} else {
 		// If menus open on click, we render the parent as a button.
-		$html .= '<button aria-label="' . esc_attr( $aria_label ) . '" class="sagiriswd-tessenav-submenu-item__content sagiriswd-tessenav-submenu-submenu__toggle" aria-expanded="false">';
+		$html .= '<button aria-label="' . esc_attr( $aria_label ) . '" class="sagiriswd-tn-item__content sagiriswd-tn-submenu__toggle" aria-expanded="false">';
 
 		// Wrap title with span to isolate it from submenu icon.
-		$html .= '<span class="sagiriswd-tessenav-submenu-item__label">';
+		$html .= '<span class="sagiriswd-tn-item__label">';
 
 		$html .= $label;
 
@@ -208,14 +197,14 @@ function render_sagiriswd_tessenav_submenu( $attributes, $content, $block ) {
 
 		// Add description if available.
 		if ( ! empty( $attributes['description'] ) ) {
-			$html .= '<span class="sagiriswd-tessenav-submenu-item__description">';
+			$html .= '<span class="sagiriswd-tn-item__description">';
 			$html .= wp_kses_post( $attributes['description'] );
 			$html .= '</span>';
 		}
 
 		$html .= '</button>';
 
-		$html .= '<span class="sagiriswd-tessenav__submenu-icon">' . sagiriswd_tessenav_submenu_render_submenu_icon() . '</span>';
+		$html .= '<span class="sagiriswd-tn__submenu-icon">' . sagiriswd_tessenav_submenu_render_submenu_icon() . '</span>';
 
 	}
 
@@ -238,24 +227,36 @@ function render_sagiriswd_tessenav_submenu( $attributes, $content, $block ) {
 		// This allows us to be able to get a response from wp_apply_colors_support.
 		$block->block_type->supports['color'] = true;
 		$colors_supports                      = wp_apply_colors_support( $block->block_type, $attributes );
-		$css_classes                          = 'sagiriswd-tessenav__submenu-container';
+		$css_classes                          = 'sagiriswd-tn__submenu-container';
 		if ( array_key_exists( 'class', $colors_supports ) ) {
 			$css_classes .= ' ' . $colors_supports['class'];
 		}
 
+
+
 		$style_attribute = '';
+
 		if ( array_key_exists( 'style', $colors_supports ) ) {
 			$style_attribute = $colors_supports['style'];
 		}
-
+		// echo '<pre>';
+		// var_dump($attributes);
+		// echo '</pre>';
+		// wp_die();
+		if ( array_key_exists( 'isInSecondHalf', $attributes ) ) {
+			$isInSecondHalf = $attributes[ 'isInSecondHalf' ];
+			$pos = $isInSecondHalf ? 'left:revert;right:0px;' : 'right:revert;left:0px;';
+			$style_attribute .= $pos;
+		}
+		
 		$inner_blocks_html = '';
-		foreach ( $block->inner_blocks as $inner_block ) {
+		foreach ( $inner_blocks as $inner_block ) {
 			$inner_blocks_html .= $inner_block->render();
 		}
 
 		if ( strpos( $inner_blocks_html, 'current-menu-item' ) ) {
 			$tag_processor = new WP_HTML_Tag_Processor( $html );
-			while ( $tag_processor->next_tag( array( 'class_name' => 'sagiriswd-tessenav-item' ) ) ) {
+			while ( $tag_processor->next_tag( array( 'class_name' => 'sagiriswd-tn-item' ) ) ) {
 				$tag_processor->add_class( 'current-menu-ancestor' );
 			}
 			$html = $tag_processor->get_updated_html();
@@ -269,32 +270,15 @@ function render_sagiriswd_tessenav_submenu( $attributes, $content, $block ) {
 		);
 
 		$html .= sprintf(
-			'<ul %s>%s</ul>',
+			'<div %s>%s</div>',
 			$wrapper_attributes,
 			$inner_blocks_html
 		);
-
+		// echo '<pre>';
+		// echo $html;
+		// echo '</pre>';
+		// wp_die();
 	}
 
-	$html .= '</li>';
-
-	return $html;
-}
-
-/**
- * Register the navigation submenu block.
- *
- * @since 5.9.0
- *
- * @uses render_sagiriswd_tessenav_submenu()
- * @throws WP_Error An WP_Error exception parsing the block definition.
- */
-function register_sagiriswd_tessenav_submenu() {
-	register_block_type_from_metadata(
-		__DIR__ . '/tessenav-submenu',
-		array(
-			'render_callback' => 'render_sagiriswd_tessenav_submenu',
-		)
-	);
-}
-add_action( 'init', 'register_sagiriswd_tessenav_submenu' );
+	$html .= '</div>';
+	echo $html;

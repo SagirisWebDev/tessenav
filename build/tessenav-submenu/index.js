@@ -1144,7 +1144,7 @@ function LinkUIPageCreator({
   \*****************************************/
 /***/ ((module) => {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"sagiriswd/tessenav-submenu","version":"0.1.0","title":"TesseNav Submenu","category":"design","icon":"smiley","parent":["sagiriswd/tessenav","sagiriswd/tessenav-submenu"],"description":"Add a submenu to TesseNav.","keywords":["submenu","navigation","mega menu","links"],"example":{},"attributes":{"label":{"type":"string","default":""},"rel":{"type":"string"},"id":{"type":"number"},"type":{"type":"string"},"opensInNewTab":{"type":"boolean","default":false},"url":{"type":"string"},"title":{"type":"string"},"kind":{"type":"string"},"flyoutDirection":{"type":"string","enum":["right","left"],"default":"right"},"panelWidth":{"type":"string","enum":["auto","match","custom"],"default":"auto"},"customPanelWidth":{"type":"number","default":0},"columns":{"type":"number","default":3},"stackAt":{"type":"string","enum":["mobile","tablet","never"],"default":"mobile"},"isTopLevelItem":{"type":"boolean"}},"usesContext":["textColor","customTextColor","backgroundColor","customBackgroundColor","overlayTextColor","customOverlayTextColor","overlayBackgroundColor","customOverlayBackgroundColor","fontSize","customFontSize","showSubmenuIcon","maxNestingLevel","openSubmenusOnClick","style"],"supports":{"reusable":false,"html":false,"typography":{"fontSize":true,"lineHeight":true,"__experimentalFontFamily":true,"__experimentalFontWeight":true,"__experimentalFontStyle":true,"__experimentalTextTransform":true,"__experimentalTextDecoration":true,"__experimentalLetterSpacing":true,"__experimentalDefaultControls":{"fontSize":true}},"interactivity":{"clientNavigation":true}},"textdomain":"sagiriswd","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","viewScript":"file:./view.js"}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"sagiriswd/tessenav-submenu","version":"0.1.0","title":"TesseNav Submenu","category":"design","icon":"smiley","parent":["sagiriswd/tessenav","sagiriswd/tessenav-submenu"],"description":"Add a submenu to TesseNav.","keywords":["submenu","navigation","mega menu","links"],"example":{},"attributes":{"label":{"type":"string","default":""},"rel":{"type":"string"},"id":{"type":"number"},"type":{"type":"string"},"kind":{"type":"string"},"opensInNewTab":{"type":"boolean","default":false},"url":{"type":"string"},"title":{"type":"string"},"isTopLevelItem":{"type":"boolean"},"customPanelWidth":{"type":"number","default":0},"isInSecondHalf":{"type":"boolean","default":false}},"usesContext":["overlayTextColor","customOverlayTextColor","overlayBackgroundColor","customOverlayBackgroundColor","fontSize","customFontSize","showSubmenuIcon","maxNestingLevel","openSubmenusOnClick"],"providesContext":{"style":"style","textColor":"style.color.text","backgroundColor":"style.color.background","linkColor":"style.elements.link.color.text","gradientColor":"style.color.gradient"},"supports":{"anchor":true,"align":true,"html":false,"typography":{"fontSize":true,"lineHeight":true,"__experimentalFontFamily":true,"__experimentalFontWeight":true,"__experimentalFontStyle":true,"__experimentalTextTransform":true,"__experimentalTextDecoration":true,"__experimentalLetterSpacing":true,"__experimentalDefaultControls":{"fontSize":true}},"color":{"__experimentalDefaultControls":{"text":true,"background":true},"gradients":true,"button":true,"link":true,"heading":true},"layout":{"default":{"type":"flex"},"allowSizingOnChildren":true},"background":{"backgroundImage":true,"backgroundSize":true},"filter":{"duotone":true},"position":{"sticky":true},"spacing":{"margin":true,"padding":true,"blockGap":true},"shadow":true,"interactivity":{"clientNavigation":true}},"textdomain":"sagiriswd","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","render":"file:./render.php","viewScriptModule":"file:./view.js"}');
 
 /***/ }),
 
@@ -1336,13 +1336,15 @@ function Edit({
     hasChildren,
     selectedBlockHasChildren,
     onlyDescendantIsEmptyLink,
-    isParentSelected
+    isParentSelected,
+    isInSecondHalf
   } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_1__.useSelect)(select => {
     const {
       hasSelectedInnerBlock,
       getSelectedBlockClientId,
       getBlockParentsByBlockName,
       getBlock,
+      getBlockIndex,
       getBlockCount,
       getBlockOrder
     } = select(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_5__.store);
@@ -1357,6 +1359,15 @@ function Edit({
       const singleBlock = getBlock(selectedBlockChildren[0]);
       _onlyDescendantIsEmptyLink = singleBlock?.name === 'core/paragraph' && !singleBlock?.attributes?.content;
     }
+    let isInSecondHalf = false;
+    const parentBlock = getBlockParentsByBlockName(clientId, 'sagiriswd/tessenav');
+    if (parentBlock.length >= 1) {
+      const desktop = window.innerWidth >= 600;
+      const pid = parentBlock[0];
+      const childCount = getBlockCount(pid);
+      const index = getBlockIndex(clientId) + 1;
+      isInSecondHalf = desktop && childCount > 2 && childCount / index < 1.5 ? true : false;
+    }
     return {
       parentCount: getBlockParentsByBlockName(clientId, 'sagiriswd/tessenav-submenu').length,
       isParentOfSelectedBlock: hasSelectedInnerBlock(clientId, true),
@@ -1364,9 +1375,15 @@ function Edit({
       hasChildren: !!getBlockCount(clientId),
       selectedBlockHasChildren: !!selectedBlockChildren?.length,
       onlyDescendantIsEmptyLink: _onlyDescendantIsEmptyLink,
-      isParentSelected: selectedBlockId === clientId
+      isParentSelected: selectedBlockId === clientId,
+      isInSecondHalf: isInSecondHalf
     };
   }, [clientId]);
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_7__.useEffect)(() => {
+    setAttributes({
+      isInSecondHalf: isInSecondHalf
+    });
+  }, [attributes['isInSecondHalf']]);
   const prevHasChildren = (0,_wordpress_compose__WEBPACK_IMPORTED_MODULE_12__.usePrevious)(hasChildren);
 
   /**
@@ -1480,11 +1497,28 @@ function Edit({
     },
     onKeyDown
   });
+  const btnStyles = {
+    color: !textColor && customTextColor,
+    backgroundColor: !backgroundColor && customBackgroundColor
+  };
 
   // Always use overlay colors for submenus.
-  const innerBlocksColors = (0,_utils__WEBPACK_IMPORTED_MODULE_17__.getColors)(context, true);
+  const innerBlocksColors = (0,_utils__WEBPACK_IMPORTED_MODULE_17__.getColors)(attributes, true);
+
+  // Set anchor positions for submenus
+  const pos = isInSecondHalf ? {
+    left: 'revert',
+    right: '0px'
+  } : {
+    right: 'revert',
+    left: '0px'
+  };
+  const innerProps = {
+    innerBlocksColors,
+    ...pos
+  };
   const allowedBlocks = parentCount >= maxNestingLevel ? ALLOWED_BLOCKS.filter(blockName => blockName !== ('sagiriswd/tessenav-submenu' || 0 || 0 || 0 || 0 || 0)) : ALLOWED_BLOCKS;
-  const submenuChildBlockProps = (0,_utils__WEBPACK_IMPORTED_MODULE_17__.getSubmenuChildBlockProps)(innerBlocksColors);
+  const submenuChildBlockProps = (0,_utils__WEBPACK_IMPORTED_MODULE_17__.getSubmenuChildBlockProps)(innerProps);
   const innerBlocksProps = (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_5__.useInnerBlocksProps)(submenuChildBlockProps, {
     allowedBlocks,
     defaultBlock: _constants__WEBPACK_IMPORTED_MODULE_18__.DEFAULT_BLOCK,
@@ -1493,14 +1527,7 @@ function Edit({
     // being edited.
     // see: https://github.com/WordPress/gutenberg/pull/34615.
     __experimentalCaptureToolbars: true,
-    renderAppender:
-    // isSelected
-    // ||
-    !isImmediateParentOfSelectedBlock && isParentSelected
-    // ||
-    // Show the appender while dragging to allow inserting element between item and the appender.
-    // hasChildren
-    ? _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_5__.InnerBlocks.ButtonBlockAppender : false
+    renderAppender: !isImmediateParentOfSelectedBlock && isParentSelected ? _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_5__.InnerBlocks.ButtonBlockAppender : false
   });
   const ParentElement = openSubmenusOnClick ? 'button' : 'a';
   function transformToTesseNavLink() {
@@ -1551,6 +1578,7 @@ function Edit({
         })]
       })
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_5__.InspectorControls, {
+      group: "settings",
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)(_controls__WEBPACK_IMPORTED_MODULE_16__.Controls, {
         attributes: attributes,
         setAttributes: setAttributes
@@ -1577,7 +1605,8 @@ function Edit({
               setIsSubmenuOpen(true);
               setOpenedBy(ref.current);
             }
-          }
+          },
+          style: btnStyles
         }), description && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("span", {
           className: "sagiriswd-tn-item__description",
           children: description
@@ -1729,14 +1758,80 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/block-editor */ "@wordpress/block-editor");
 /* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__);
+/**
+ * WordPress dependencies
+ */
+// import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
+
+// export default function save() {
+// 	const blockProps = useBlockProps.save({
+// 		className: 'sagiriswd-tn-submenu',
+// 	});
+
+// 	const innerProps = useInnerBlocksProps.save( blockProps );
+
+// 	return (
+// 		<div { ...innerProps } />
+// 	)
+// }
+
 /**
  * WordPress dependencies
  */
 
-function save() {
-  return {
-    ..._wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.useInnerBlocksProps.save()
-  };
+
+/**
+ * Save
+ */
+
+function save({
+  attributes
+}) {
+  // const {
+  // 	label = '',
+  // 	description = '',
+  // 	openSubmenusOnClick = false, // keep parity with edit UI
+  // } = attributes;
+
+  // // Match edit: wrapper carries the generic “item” class so color supports apply as expected.
+  // const blockProps = useBlockProps.save( {
+  // 	className: [
+  // 		'sagiriswd-tn-submenu',  // block-specific root
+  // 		'sagiriswd-tn-item',     // matches edit for color/spacing states
+  // 		openSubmenusOnClick ? 'open-on-click' : null,
+  // 	]
+  // 		.filter( Boolean )
+  // 		.join( ' ' ),
+  // } );
+
+  // // Match edit: button when open-on-click, otherwise a simple anchor (no href)
+  // const ParentElement = openSubmenusOnClick ? 'button' : 'a';
+
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_0__.InnerBlocks.Content, {});
+  // (
+  // 	<div { ...blockProps }>
+  // 		<ParentElement className="sagiriswd-tn-item__content" aria-haspopup="true" aria-expanded="false">
+  // 			<RichText.Content
+  // 				tagName="span"
+  // 				className="sagiriswd-tn-item__label"
+  // 				value={ label }
+  // 			/>
+  // 			{ !!description && (
+  // 				<span className="sagiriswd-tn-item__description">{ description }</span>
+  // 			) }
+  // 		</ParentElement>
+
+  // 		{/* Keep an icon hook; you can style or inject SVG via CSS if you prefer */}
+  // 		<span className="sagiriswd-tn__submenu-icon" aria-hidden="true"></span>
+
+  // 		{/* The submenu panel that contains nested blocks */}
+  // 		<div className="sagiriswd-tn-submenu__container" hidden>
+  // 			<InnerBlocks.Content />
+  // 		</div>
+  // 	</div>
+  // );
 }
 
 /***/ }),
@@ -1970,14 +2065,31 @@ const updateAttributes = (updatedValue = {}, setAttributes, blockAttributes = {}
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ColorTools: () => (/* binding */ ColorTools),
 /* harmony export */   detectColors: () => (/* binding */ detectColors),
 /* harmony export */   getColors: () => (/* binding */ getColors),
 /* harmony export */   getSubmenuChildBlockProps: () => (/* binding */ getSubmenuChildBlockProps)
 /* harmony export */ });
 /* harmony import */ var clsx__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! clsx */ "./node_modules/clsx/dist/clsx.mjs");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/block-editor */ "@wordpress/block-editor");
+/* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__);
 /**
  * External dependencies
  */
+
+
+/**
+ * Wordpress Dependencies
+ */
+
+
+
 
 function getComputedStyle(node) {
   return node.ownerDocument.defaultView.getComputedStyle(node);
@@ -2046,17 +2158,105 @@ function getColors(context, isSubMenu) {
   }
   return colors;
 }
-function getSubmenuChildBlockProps(innerBlocksColors) {
+function ColorTools({
+  textColor,
+  setTextColor,
+  backgroundColor,
+  setBackgroundColor,
+  overlayTextColor,
+  setOverlayTextColor,
+  overlayBackgroundColor,
+  setOverlayBackgroundColor,
+  clientId,
+  navRef
+}) {
+  const [detectedBackgroundColor, setDetectedBackgroundColor] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)();
+  const [detectedColor, setDetectedColor] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)();
+  const [detectedOverlayBackgroundColor, setDetectedOverlayBackgroundColor] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)();
+  const [detectedOverlayColor, setDetectedOverlayColor] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useState)();
+  // Turn on contrast checker for web only since it's not supported on mobile yet.
+  const enableContrastChecking = _wordpress_element__WEBPACK_IMPORTED_MODULE_2__.Platform.OS === 'web';
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_2__.useEffect)(() => {
+    if (!enableContrastChecking) {
+      return;
+    }
+    detectColors(navRef.current, setDetectedColor, setDetectedBackgroundColor);
+    const subMenuElement = navRef.current?.querySelector('[data-type="sagiriswd/tessenav-submenu"]');
+    if (!subMenuElement) {
+      return;
+    }
+
+    // Only detect submenu overlay colors if they have previously been explicitly set.
+    // This avoids the contrast checker from reporting on inherited submenu colors and
+    // showing the contrast warning twice.
+    if (overlayTextColor.color || overlayBackgroundColor.color) {
+      detectColors(subMenuElement, setDetectedOverlayColor, setDetectedOverlayBackgroundColor);
+    }
+  }, [enableContrastChecking, overlayTextColor.color, overlayBackgroundColor.color, navRef]);
+  const colorGradientSettings = (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_3__.__experimentalUseMultipleOriginColorsAndGradients)();
+  if (!colorGradientSettings.hasColorsOrGradients) {
+    return null;
+  }
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_3__.__experimentalColorGradientSettingsDropdown, {
+      __experimentalIsRenderedInSidebar: true,
+      settings: [{
+        colorValue: textColor.color,
+        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Text'),
+        onColorChange: setTextColor,
+        resetAllFilter: () => setTextColor(),
+        clearable: true,
+        enableAlpha: true
+      }, {
+        colorValue: backgroundColor.color,
+        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Background'),
+        onColorChange: setBackgroundColor,
+        resetAllFilter: () => setBackgroundColor(),
+        clearable: true,
+        enableAlpha: true
+      }, {
+        colorValue: overlayTextColor.color,
+        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Submenu & overlay text'),
+        onColorChange: setOverlayTextColor,
+        resetAllFilter: () => setOverlayTextColor(),
+        clearable: true,
+        enableAlpha: true
+      }, {
+        colorValue: overlayBackgroundColor.color,
+        label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Submenu & overlay background'),
+        onColorChange: setOverlayBackgroundColor,
+        resetAllFilter: () => setOverlayBackgroundColor(),
+        clearable: true,
+        enableAlpha: true
+      }],
+      panelId: clientId,
+      ...colorGradientSettings,
+      gradients: [],
+      disableCustomGradients: true
+    }), enableContrastChecking && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_3__.ContrastChecker, {
+        backgroundColor: detectedBackgroundColor,
+        textColor: detectedColor
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_3__.ContrastChecker, {
+        backgroundColor: detectedOverlayBackgroundColor,
+        textColor: detectedOverlayColor
+      })]
+    })]
+  });
+}
+function getSubmenuChildBlockProps(innerProps) {
   return {
     className: (0,clsx__WEBPACK_IMPORTED_MODULE_0__["default"])('sagiriswd-tn__submenu-container', {
-      'has-text-color': !!(innerBlocksColors.textColor || innerBlocksColors.customTextColor),
-      [`has-${innerBlocksColors.textColor}-color`]: !!innerBlocksColors.textColor,
-      'has-background': !!(innerBlocksColors.backgroundColor || innerBlocksColors.customBackgroundColor),
-      [`has-${innerBlocksColors.backgroundColor}-background-color`]: !!innerBlocksColors.backgroundColor
+      'has-text-color': !!(innerProps.textColor || innerProps.customTextColor),
+      [`has-${innerProps.textColor}-color`]: !!innerProps.textColor,
+      'has-background': !!(innerProps.backgroundColor || innerProps.customBackgroundColor),
+      [`has-${innerProps.backgroundColor}-background-color`]: !!innerProps.backgroundColor
     }),
     style: {
-      color: innerBlocksColors.customTextColor,
-      backgroundColor: innerBlocksColors.customBackgroundColor
+      color: innerProps.customTextColor,
+      backgroundColor: innerProps.customBackgroundColor,
+      left: innerProps.left,
+      right: innerProps.right
     }
   };
 }

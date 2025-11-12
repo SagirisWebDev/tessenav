@@ -9,36 +9,50 @@
 	// Show on editor selected, even if on frontend it only stays open on focus-within.
 	&.is-selected,
 	&.has-child-selected {
+
 		> .sagiriswd-tn__submenu-container {
 			// We use important here because if the parent block is selected and submenus are present, they should always be visible.
 			visibility: visible;
 			opacity: 1;
 			min-width: 200px;
+			max-width: 1920px;
 			height: auto;
-			width: 500%;
-			max-width: 100vw;
+			width: min-content;
 			// These styles are needed to display the dropdown properly when it is empty.
 			position: absolute;
 			left: -1px; // Border width.
 			top: 100%;
-			padding: 1rem;
 			overflow: visible;
+		}
 
-			@include m.break-medium {
-				.sagiriswd-tn__submenu-container {
-					left: 100%;
-					top: -1px; // Border width.
+		@include m.break-medium {
 
-					// Prevent the menu from disappearing when the mouse is over the gap
-					&::before {
-						content: "";
-						position: absolute;
-						right: 100%;
-						height: 100%;
-						display: block;
-						width: 0.5em;
-						background: transparent;
-					}
+			// &:first-child > .sagiriswd-tn__submenu-container {
+			// 	left: 0px;
+			// }
+
+			// &:nth-last-child(2) > .sagiriswd-tn__submenu-container {
+			// 	left: revert;
+			// 	right: 0px;
+			// }
+
+			> .sagiriswd-tn__submenu-container {
+				// left: 100%;
+				// bottom: 0px;
+				right: 50%;
+				left: 50%;
+				top: 100%;
+				min-width: 500px;
+
+				// Prevent the menu from disappearing when the mouse is over the gap
+				&::before {
+					content: "";
+					position: absolute;
+					right: 100%;
+					height: 100%;
+					display: block;
+					width: 0.5em;
+					background: transparent;
 				}
 			}
 		}

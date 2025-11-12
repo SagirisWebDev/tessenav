@@ -96,21 +96,23 @@
   visibility: visible;
   opacity: 1;
   min-width: 200px;
+  max-width: 1920px;
   height: auto;
-  width: 500%;
-  max-width: 100vw;
+  width: -moz-min-content;
+  width: min-content;
   position: absolute;
   right: -1px;
   top: 100%;
-  padding: 1rem;
   overflow: visible;
 }
 @media (min-width: 782px) {
-  .wp-block-sagiriswd-tessenav-submenu.is-selected > .sagiriswd-tn__submenu-container .sagiriswd-tn__submenu-container, .wp-block-sagiriswd-tessenav-submenu.has-child-selected > .sagiriswd-tn__submenu-container .sagiriswd-tn__submenu-container {
-    right: 100%;
-    top: -1px;
+  .wp-block-sagiriswd-tessenav-submenu.is-selected > .sagiriswd-tn__submenu-container, .wp-block-sagiriswd-tessenav-submenu.has-child-selected > .sagiriswd-tn__submenu-container {
+    left: 50%;
+    right: 50%;
+    top: 100%;
+    min-width: 500px;
   }
-  .wp-block-sagiriswd-tessenav-submenu.is-selected > .sagiriswd-tn__submenu-container .sagiriswd-tn__submenu-container::before, .wp-block-sagiriswd-tessenav-submenu.has-child-selected > .sagiriswd-tn__submenu-container .sagiriswd-tn__submenu-container::before {
+  .wp-block-sagiriswd-tessenav-submenu.is-selected > .sagiriswd-tn__submenu-container::before, .wp-block-sagiriswd-tessenav-submenu.has-child-selected > .sagiriswd-tn__submenu-container::before {
     content: "";
     position: absolute;
     left: 100%;

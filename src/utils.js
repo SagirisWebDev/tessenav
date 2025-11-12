@@ -3,6 +3,21 @@
  */
 import clsx from 'clsx';
 
+/**
+ * Wordpress Dependencies
+ */
+import { __ } from '@wordpress/i18n';
+import {
+	useState,
+	useEffect,
+	Platform
+} from '@wordpress/element';
+import {
+		__experimentalColorGradientSettingsDropdown as ColorGradientSettingsDropdown,
+		__experimentalUseMultipleOriginColorsAndGradients as useMultipleOriginColorsAndGradients,
+		ContrastChecker
+} from '@wordpress/block-editor';
+
 function getComputedStyle( node ) {
 	return node.ownerDocument.defaultView.getComputedStyle( node );
 }
@@ -89,24 +104,144 @@ export function getColors( context, isSubMenu ) {
 	return colors;
 }
 
-export function getSubmenuChildBlockProps( innerBlocksColors ) {
+ export function ColorTools( {
+	textColor,
+	setTextColor,
+	backgroundColor,
+	setBackgroundColor,
+	overlayTextColor,
+	setOverlayTextColor,
+	overlayBackgroundColor,
+	setOverlayBackgroundColor,
+	clientId,
+	navRef,
+} ) {
+	const [ detectedBackgroundColor, setDetectedBackgroundColor ] = useState();
+	const [ detectedColor, setDetectedColor ] = useState();
+	const [
+		detectedOverlayBackgroundColor,
+		setDetectedOverlayBackgroundColor,
+	] = useState();
+	const [ detectedOverlayColor, setDetectedOverlayColor ] = useState();
+	// Turn on contrast checker for web only since it's not supported on mobile yet.
+	const enableContrastChecking = Platform.OS === 'web';
+	useEffect( () => {
+		if ( ! enableContrastChecking ) {
+			return;
+		}
+		detectColors(
+			navRef.current,
+			setDetectedColor,
+			setDetectedBackgroundColor
+		);
+
+		const subMenuElement = navRef.current?.querySelector(
+			'[data-type="sagiriswd/tessenav-submenu"]'
+		);
+
+		if ( ! subMenuElement ) {
+			return;
+		}
+
+		// Only detect submenu overlay colors if they have previously been explicitly set.
+		// This avoids the contrast checker from reporting on inherited submenu colors and
+		// showing the contrast warning twice.
+		if ( overlayTextColor.color || overlayBackgroundColor.color ) {
+			detectColors(
+				subMenuElement,
+				setDetectedOverlayColor,
+				setDetectedOverlayBackgroundColor
+			);
+		}
+	}, [
+		enableContrastChecking,
+		overlayTextColor.color,
+		overlayBackgroundColor.color,
+		navRef,
+	] );
+	const colorGradientSettings = useMultipleOriginColorsAndGradients();
+	if ( ! colorGradientSettings.hasColorsOrGradients ) {
+		return null;
+	}
+	return (
+		<>
+			<ColorGradientSettingsDropdown
+				__experimentalIsRenderedInSidebar
+				settings={ [
+					{
+						colorValue: textColor.color,
+						label: __( 'Text' ),
+						onColorChange: setTextColor,
+						resetAllFilter: () => setTextColor(),
+						clearable: true,
+						enableAlpha: true,
+					},
+					{
+						colorValue: backgroundColor.color,
+						label: __( 'Background' ),
+						onColorChange: setBackgroundColor,
+						resetAllFilter: () => setBackgroundColor(),
+						clearable: true,
+						enableAlpha: true,
+					},
+					{
+						colorValue: overlayTextColor.color,
+						label: __( 'Submenu & overlay text' ),
+						onColorChange: setOverlayTextColor,
+						resetAllFilter: () => setOverlayTextColor(),
+						clearable: true,
+						enableAlpha: true,
+					},
+					{
+						colorValue: overlayBackgroundColor.color,
+						label: __( 'Submenu & overlay background' ),
+						onColorChange: setOverlayBackgroundColor,
+						resetAllFilter: () => setOverlayBackgroundColor(),
+						clearable: true,
+						enableAlpha: true,
+					},
+				] }
+				panelId={ clientId }
+				{ ...colorGradientSettings }
+				gradients={ [] }
+				disableCustomGradients
+			/>
+			{ enableContrastChecking && (
+				<>
+					<ContrastChecker
+						backgroundColor={ detectedBackgroundColor }
+						textColor={ detectedColor }
+					/>
+					<ContrastChecker
+						backgroundColor={ detectedOverlayBackgroundColor }
+						textColor={ detectedOverlayColor }
+					/>
+				</>
+			) }
+		</>
+	);
+}
+
+export function getSubmenuChildBlockProps( innerProps ) {
 	return {
 		className: clsx( 'sagiriswd-tn__submenu-container', {
 			'has-text-color': !! (
-				innerBlocksColors.textColor || innerBlocksColors.customTextColor
+				innerProps.textColor || innerProps.customTextColor
 			),
-			[ `has-${ innerBlocksColors.textColor }-color` ]:
-				!! innerBlocksColors.textColor,
+			[ `has-${ innerProps.textColor }-color` ]:
+				!! innerProps.textColor,
 			'has-background': !! (
-				innerBlocksColors.backgroundColor ||
-				innerBlocksColors.customBackgroundColor
+				innerProps.backgroundColor ||
+				innerProps.customBackgroundColor
 			),
-			[ `has-${ innerBlocksColors.backgroundColor }-background-color` ]:
-				!! innerBlocksColors.backgroundColor,
+			[ `has-${ innerProps.backgroundColor }-background-color` ]:
+				!! innerProps.backgroundColor,
 		} ),
 		style: {
-			color: innerBlocksColors.customTextColor,
-			backgroundColor: innerBlocksColors.customBackgroundColor,
+			color: innerProps.customTextColor,
+			backgroundColor: innerProps.customBackgroundColor,
+			left: innerProps.left,
+			right: innerProps.right
 		},
 	};
 }

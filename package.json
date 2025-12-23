@@ -14,16 +14,19 @@
 		"plugin-zip": "wp-scripts plugin-zip",
 		"start": "wp-scripts start --blocks-manifest --experimental-modules"
 	},
-		"dependencies": {
+	"dependencies": {
 		"@wordpress/interactivity": "latest"
 	},
-		"files": [
+	"files": [
 		"[^.]*"
 	],
 	"devDependencies": {
 		"@wordpress/base-styles": "^6.8.0",
+		"@wordpress/components": "^30.9.0",
+		"@wordpress/eslint-plugin": "^22.22.0",
 		"@wordpress/icons": "^10.32.0",
 		"@wordpress/scripts": "^30.25.0",
+		"baseline-browser-mapping": "^2.9.11",
 		"clsx": "^2.1.1",
 		"sass": "^1.93.2"
 	}

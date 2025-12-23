@@ -85,7 +85,10 @@ if ( ! function_exists( 'sagiriswd_tessenav_submenu_render_submenu_icon') ) {
 	$open_on_click           = isset( $block->context['openSubmenusOnClick'] ) && $block->context['openSubmenusOnClick'];
 	$open_on_hover_and_click = isset( $block->context['openSubmenusOnClick'] ) && ! $block->context['openSubmenusOnClick'] &&
 		$show_submenu_indicators;
-
+	$has_parent_text_color = isset( $block->context['textColor'] ) && $block->context['textColor'];
+	$has_parent_background_color = isset( $block->context['backgroundColor'] ) && $block->context['backgroundColor']; 
+	$has_text_color_set = array_key_exists( 'textColor', $attributes );
+	$has_background_color_set = array_key_exists( 'backgroundColor', $attributes );
 	$classes = array(
 		'sagiriswd-tn-submenu',
 	);
@@ -105,6 +108,14 @@ if ( ! function_exists( 'sagiriswd_tessenav_submenu_render_submenu_icon') ) {
 	}
 	if ( $is_active ) {
 		$classes[] = 'current-menu-item';
+	}
+	if ( $has_parent_text_color && ! $has_text_color_set ) {
+		$classes[] = 'has-text-color';
+		$classes[] = sprintf('has-%1$s-color', $block->context['textColor'] );
+	}
+	if ( $has_parent_background_color && ! $has_background_color_set ) {
+		$classes[] = 'has-background';
+		$classes[] = sprintf('has-%1$s-background-color', $block->context['backgroundColor'] );
 	}
 
 	$wrapper_attributes = get_block_wrapper_attributes(

@@ -5,7 +5,6 @@
 	"version": "0.1.0",
 	"title": "TesseNav",
 	"category": "theme",
-	"icon": "screenoptions",
 	"description": "Add text, media, layout, design and theme blocks to the Navigation block.",
 	"keywords": [ "menu", "navigation", "links", "mega menu" ],
 	"example": {},
@@ -96,12 +95,6 @@
 		"anchor": true,
 		"ariaLabel": true,
 		"html": false,
-		"color": {
-			"button": true,
-			"gradients": true,
-			"heading": true,
-			"link": true
-		},
 		"typography": {
 			"fontSize": true,
 			"lineHeight": true,

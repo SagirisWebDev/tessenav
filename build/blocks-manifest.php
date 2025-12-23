@@ -8,7 +8,6 @@ return array(
 		'version' => '0.1.0',
 		'title' => 'TesseNav',
 		'category' => 'theme',
-		'icon' => 'screenoptions',
 		'description' => 'Add text, media, layout, design and theme blocks to the Navigation block.',
 		'keywords' => array(
 			'menu',
@@ -114,12 +113,6 @@ return array(
 			'anchor' => true,
 			'ariaLabel' => true,
 			'html' => false,
-			'color' => array(
-				'button' => true,
-				'gradients' => true,
-				'heading' => true,
-				'link' => true
-			),
 			'typography' => array(
 				'fontSize' => true,
 				'lineHeight' => true,
@@ -278,7 +271,6 @@ return array(
 		'version' => '0.1.0',
 		'title' => 'TesseNav Submenu',
 		'category' => 'design',
-		'icon' => 'smiley',
 		'parent' => array(
 			'sagiriswd/tessenav',
 			'sagiriswd/tessenav-submenu'
@@ -333,6 +325,10 @@ return array(
 			)
 		),
 		'usesContext' => array(
+			'textColor',
+			'customTextColor',
+			'backgroundColor',
+			'customBackgroundColor',
 			'overlayTextColor',
 			'customOverlayTextColor',
 			'overlayBackgroundColor',
@@ -367,16 +363,6 @@ return array(
 					'fontSize' => true
 				)
 			),
-			'color' => array(
-				'__experimentalDefaultControls' => array(
-					'text' => true,
-					'background' => true
-				),
-				'gradients' => true,
-				'button' => true,
-				'link' => true,
-				'heading' => true
-			),
 			'layout' => array(
 				'default' => array(
 					'type' => 'flex'
@@ -389,6 +375,11 @@ return array(
 			),
 			'filter' => array(
 				'duotone' => true
+			),
+			'dimensions' => array(
+				'aspectRatio' => false,
+				'minHeight' => true,
+				'width' => true
 			),
 			'position' => array(
 				'sticky' => true

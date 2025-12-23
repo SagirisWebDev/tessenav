@@ -5,7 +5,6 @@
   "version": "0.1.0",
   "title": "TesseNav Submenu",
   "category": "design",
-  "icon": "smiley",
   "parent": [
     "sagiriswd/tessenav",
     "sagiriswd/tessenav-submenu"
@@ -58,6 +57,10 @@
     }
   },
   "usesContext": [
+    "textColor",
+    "customTextColor",
+    "backgroundColor",
+    "customBackgroundColor",
     "overlayTextColor",
     "customOverlayTextColor",
     "overlayBackgroundColor",
@@ -92,16 +95,6 @@
         "fontSize": true
       }
     },
-    "color": {
-      "__experimentalDefaultControls": {
-        "text": true,
-        "background": true
-      },
-      "gradients": true,
-      "button": true,
-      "link": true,
-      "heading": true
-    },
     "layout": {
       "default": {
         "type": "flex"
@@ -114,6 +107,11 @@
     },
     "filter": {
       "duotone": true
+    },
+    "dimensions": {
+      "aspectRatio": false,
+      "minHeight": true,
+      "width": true
     },
     "position": {
       "sticky": true

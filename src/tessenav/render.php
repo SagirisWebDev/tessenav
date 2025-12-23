@@ -10,7 +10,6 @@
  * @see https://github.com/WordPress/gutenberg/blob/trunk/docs/reference-guides/block-api/block-metadata.md#render
  */
 
-
 if ( ! function_exists( 'sagiriswd_tessenav_build_css_font_sizes') ) {
 	function sagiriswd_tessenav_build_css_font_sizes( $attributes ) {
 	// CSS classes.
@@ -260,7 +259,11 @@ if ( ! function_exists( 'sagiriswd_tessenav_get_inner_blocks_html') ) {
 			$inner_blocks_html = sagiriswd_tessenav_add_directives_to_submenu( $tags, $attributes );
 		}
 
-		return $inner_blocks_html;
+		// 		echo '<pre>';
+		// esc_html_e(sprintf('<div %1$s>%2$s</div>', $container_attributes, $inner_blocks_html));
+		// echo '</pre>';
+		// wp_die();
+		return sprintf('<div %1$s>%2$s</div>', $container_attributes, $inner_blocks_html);
 	}
 }
 
@@ -506,6 +509,7 @@ if ( isset( $attributes['rgbTextColor'] ) && empty( $attributes['textColor'] ) )
 if ( isset( $attributes['rgbBackgroundColor'] ) && empty( $attributes['backgroundColor'] ) ) {
 	$attributes['customBackgroundColor'] = $attributes['rgbBackgroundColor'];
 }
+
 
 unset( $attributes['rgbTextColor'], $attributes['rgbBackgroundColor'] );
 

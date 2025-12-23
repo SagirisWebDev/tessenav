@@ -269,7 +269,7 @@ function useToolsPanelDropdownMenuProps() {
   \*********************************/
 /***/ ((module) => {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"sagiriswd/tessenav","version":"0.1.0","title":"TesseNav","category":"theme","icon":"screenoptions","description":"Add text, media, layout, design and theme blocks to the Navigation block.","keywords":["menu","navigation","links","mega menu"],"example":{},"attributes":{"ref":{"type":"object"},"textColor":{"type":"string"},"customTextColor":{"type":"string"},"rgbTextColor":{"type":"string"},"backgroundColor":{"type":"string"},"customBackgroundColor":{"type":"string"},"rgbBackgroundColor":{"type":"string"},"showSubmenuIcon":{"type":"boolean","default":true},"openSubmenusOnClick":{"type":"boolean","default":false},"overlayMenu":{"type":"string","default":"mobile"},"icon":{"type":"string","default":"handle"},"hasIcon":{"type":"boolean","default":true},"__unstableLocation":{"type":"string"},"overlayBackgroundColor":{"type":"string"},"customOverlayBackgroundColor":{"type":"string"},"overlayTextColor":{"type":"string"},"customOverlayTextColor":{"type":"string"},"maxNestingLevel":{"type":"number","default":5},"templateLock":{"type":["string","boolean"],"enum":["all","insert","contentOnly",false]}},"providesContext":{"textColor":"textColor","customTextColor":"customTextColor","backgroundColor":"backgroundColor","customBackgroundColor":"customBackgroundColor","overlayTextColor":"overlayTextColor","customOverlayTextColor":"customOverlayTextColor","overlayBackgroundColor":"overlayBackgroundColor","customOverlayBackgroundColor":"customOverlayBackgroundColor","fontSize":"fontSize","customFontSize":"customFontSize","showSubmenuIcon":"showSubmenuIcon","openSubmenusOnClick":"openSubmenusOnClick","style":"style","maxNestingLevel":"maxNestingLevel"},"supports":{"align":true,"anchor":true,"ariaLabel":true,"html":false,"color":{"button":true,"gradients":true,"heading":true,"link":true},"typography":{"fontSize":true,"lineHeight":true,"__experimentalFontStyle":true,"__experimentalFontWeight":true,"__experimentalTextTransform":true,"__experimentalFontFamily":true,"__experimentalLetterSpacing":true,"__experimentalTextDecoration":true,"__experimentalSkipSerialization":["textDecoration"],"__experimentalDefaultControls":{"fontSize":true}},"spacing":{"margin":true,"padding":true,"blockGap":true},"layout":{"allowSwitching":false,"allowInheriting":true,"allowEditing":true,"allowCustomContentAndWideSize":true,"allowJustification":true,"allowOrientation":true,"allowVerticalAlignment":true,"allowSizingOnChildren":true,"default":{"type":"flex"}},"background":{"backgroundImage":true,"backgroundSize":true},"dimensions":{"aspectRatio":false,"minHeight":true},"filter":{"duotone":true},"position":{"sticky":true},"shadow":true,"interactivity":true,"renaming":false,"contentRole":true},"textdomain":"sagiriswd","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","render":"file:./render.php","viewScriptModule":"file:./view.js"}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"sagiriswd/tessenav","version":"0.1.0","title":"TesseNav","category":"theme","description":"Add text, media, layout, design and theme blocks to the Navigation block.","keywords":["menu","navigation","links","mega menu"],"example":{},"attributes":{"ref":{"type":"object"},"textColor":{"type":"string"},"customTextColor":{"type":"string"},"rgbTextColor":{"type":"string"},"backgroundColor":{"type":"string"},"customBackgroundColor":{"type":"string"},"rgbBackgroundColor":{"type":"string"},"showSubmenuIcon":{"type":"boolean","default":true},"openSubmenusOnClick":{"type":"boolean","default":false},"overlayMenu":{"type":"string","default":"mobile"},"icon":{"type":"string","default":"handle"},"hasIcon":{"type":"boolean","default":true},"__unstableLocation":{"type":"string"},"overlayBackgroundColor":{"type":"string"},"customOverlayBackgroundColor":{"type":"string"},"overlayTextColor":{"type":"string"},"customOverlayTextColor":{"type":"string"},"maxNestingLevel":{"type":"number","default":5},"templateLock":{"type":["string","boolean"],"enum":["all","insert","contentOnly",false]}},"providesContext":{"textColor":"textColor","customTextColor":"customTextColor","backgroundColor":"backgroundColor","customBackgroundColor":"customBackgroundColor","overlayTextColor":"overlayTextColor","customOverlayTextColor":"customOverlayTextColor","overlayBackgroundColor":"overlayBackgroundColor","customOverlayBackgroundColor":"customOverlayBackgroundColor","fontSize":"fontSize","customFontSize":"customFontSize","showSubmenuIcon":"showSubmenuIcon","openSubmenusOnClick":"openSubmenusOnClick","style":"style","maxNestingLevel":"maxNestingLevel"},"supports":{"align":true,"anchor":true,"ariaLabel":true,"html":false,"typography":{"fontSize":true,"lineHeight":true,"__experimentalFontStyle":true,"__experimentalFontWeight":true,"__experimentalTextTransform":true,"__experimentalFontFamily":true,"__experimentalLetterSpacing":true,"__experimentalTextDecoration":true,"__experimentalSkipSerialization":["textDecoration"],"__experimentalDefaultControls":{"fontSize":true}},"spacing":{"margin":true,"padding":true,"blockGap":true},"layout":{"allowSwitching":false,"allowInheriting":true,"allowEditing":true,"allowCustomContentAndWideSize":true,"allowJustification":true,"allowOrientation":true,"allowVerticalAlignment":true,"allowSizingOnChildren":true,"default":{"type":"flex"}},"background":{"backgroundImage":true,"backgroundSize":true},"dimensions":{"aspectRatio":false,"minHeight":true},"filter":{"duotone":true},"position":{"sticky":true},"shadow":true,"interactivity":true,"renaming":false,"contentRole":true},"textdomain":"sagiriswd","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","render":"file:./render.php","viewScriptModule":"file:./view.js"}');
 
 /***/ }),
 
@@ -1012,16 +1012,21 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_blocks__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/blocks */ "@wordpress/blocks");
 /* harmony import */ var _wordpress_blocks__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_blocks__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _style_scss__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./style.scss */ "./src/tessenav/style.scss");
-/* harmony import */ var _editor_scss__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./editor.scss */ "./src/tessenav/editor.scss");
-/* harmony import */ var _edit__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./edit */ "./src/tessenav/edit/index.js");
-/* harmony import */ var _save__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./save */ "./src/tessenav/save.js");
-/* harmony import */ var _block_json__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./block.json */ "./src/tessenav/block.json");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _style_scss__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./style.scss */ "./src/tessenav/style.scss");
+/* harmony import */ var _editor_scss__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./editor.scss */ "./src/tessenav/editor.scss");
+/* harmony import */ var _edit__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./edit */ "./src/tessenav/edit/index.js");
+/* harmony import */ var _save__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./save */ "./src/tessenav/save.js");
+/* harmony import */ var _block_json__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./block.json */ "./src/tessenav/block.json");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__);
 /**
  * Registers a new block provided a unique name and an object defining its behavior.
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/
  */
+
 
 
 /**
@@ -1042,19 +1047,205 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /**
+ * Block Editor Icon
+ */
+
+const icon = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SVG, {
+  version: "1.2",
+  xmlns: "http://www.w3.org/2000/svg",
+  viewBox: "0 0 64 64",
+  width: "64",
+  height: "64",
+  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m18.3 23.8l14-8.4z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m32.3 15.4l13.4 8.2z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m45.7 23.6l0.5 16.6z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m46.2 40.2l-13.9 7.9z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m32.3 48.1l-13.9-8z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m18.4 40.1l-0.2-15.7z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m18.2 23.5l-10.5-6.5z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m31.7 3l0.3 12.5z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m45.6 23.6l11.2-6.5z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m46.2 40.4l9.6 5.9z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m32.3 48.1v13.1z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m18.6 40l-10.8 6.7z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m7.2 46.4l-0.2-29.8z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m7.2 16.3l24.4-13.9z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m31.8 2.3l25 14.8z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m56.8 17.1l-0.2 28.9z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m56.3 46.5l-24 14.7z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m32.3 61.2l-24.7-14.6z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m19 24l5.9 4.1z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m45.7 23.7l-6.1 3.7z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    class: "a",
+    stroke: "#000",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "m32.3 47.9l-0.1-7.9z"
+  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.Path, {
+    "fill-rule": "evenodd",
+    d: "m38.1 23.2q0.1-0.3 0-0.6-0.1-0.2-0.4-0.4-0.2-0.2-0.5-0.2-0.3 0-0.5 0.2l-9.2 5.6q-0.1 0.1-0.3 0.3-0.1 0.1-0.2 0.3-0.1 0.1-0.2 0.3-0.1 0.2-0.1 0.4l-2.3 10.5q0 0.3 0.1 0.6 0.1 0.2 0.3 0.4 0.3 0.2 0.6 0.2 0.3 0 0.5-0.2l9.1-5.6q0.2-0.1 0.4-0.3 0.1-0.1 0.2-0.3 0.1-0.1 0.2-0.3 0.1-0.2 0.1-0.4zm-9.4 6.4q0 0 0 0-0.1-0.1-0.1-0.1 0 0 0.1 0 0-0.1 0-0.1l7-4.4-1.7 8.2q0 0 0 0 0 0 0 0 0 0.1-0.1 0.1 0 0 0-0.1z"
+  })]
+});
+/**
  * Every block starts by registering a new block type definition.
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/
  */
-(0,_wordpress_blocks__WEBPACK_IMPORTED_MODULE_0__.registerBlockType)(_block_json__WEBPACK_IMPORTED_MODULE_5__.name, {
+(0,_wordpress_blocks__WEBPACK_IMPORTED_MODULE_0__.registerBlockType)(_block_json__WEBPACK_IMPORTED_MODULE_6__.name, {
+  icon: {
+    src: icon
+  },
   /**
    * @see ./edit.js
    */
-  edit: _edit__WEBPACK_IMPORTED_MODULE_3__["default"],
+  edit: _edit__WEBPACK_IMPORTED_MODULE_4__["default"],
   /**
    * @see ./save.js
    */
-  save: _save__WEBPACK_IMPORTED_MODULE_4__["default"]
+  save: _save__WEBPACK_IMPORTED_MODULE_5__["default"]
 });
 
 /***/ }),

@@ -17,7 +17,7 @@
 			min-width: 200px;
 			max-width: 1920px;
 			height: auto;
-			width: min-content;
+			width: max-content;
 			// These styles are needed to display the dropdown properly when it is empty.
 			position: absolute;
 			left: -1px; // Border width.
@@ -27,22 +27,10 @@
 
 		@include m.break-medium {
 
-			// &:first-child > .sagiriswd-tn__submenu-container {
-			// 	left: 0px;
-			// }
-
-			// &:nth-last-child(2) > .sagiriswd-tn__submenu-container {
-			// 	left: revert;
-			// 	right: 0px;
-			// }
-
 			> .sagiriswd-tn__submenu-container {
-				// left: 100%;
-				// bottom: 0px;
 				right: 50%;
 				left: 50%;
 				top: 100%;
-				min-width: 500px;
 
 				// Prevent the menu from disappearing when the mouse is over the gap
 				&::before {

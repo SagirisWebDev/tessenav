@@ -22,6 +22,16 @@
   /* Editor canvas sits inside a scrollable pane—ensure overlay floats on top */
   position: fixed;
   inset: 0;
+  gap: inherit;
+}
+.sagiriswd-tn__responsive-container.is-menu-open .sagiriswd-tn__inner,
+.sagiriswd-tn__responsive-container.has-modal-open .sagiriswd-tn__inner {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.sagiriswd-tn__inner {
+  width: 100%;
 }
 
 /* Editor toggles remain visible/usable */

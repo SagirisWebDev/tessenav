@@ -98,8 +98,8 @@
   min-width: 200px;
   max-width: 1920px;
   height: auto;
-  width: -moz-min-content;
-  width: min-content;
+  width: -moz-max-content;
+  width: max-content;
   position: absolute;
   right: -1px;
   top: 100%;
@@ -110,7 +110,6 @@
     left: 50%;
     right: 50%;
     top: 100%;
-    min-width: 500px;
   }
   .wp-block-sagiriswd-tessenav-submenu.is-selected > .sagiriswd-tn__submenu-container::before, .wp-block-sagiriswd-tessenav-submenu.has-child-selected > .sagiriswd-tn__submenu-container::before {
     content: "";

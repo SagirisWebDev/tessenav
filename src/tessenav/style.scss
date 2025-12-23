@@ -605,7 +605,6 @@ button.sagiriswd-tn-item__content {
 		.sagiriswd-tn-item,
 		.wp-block-page-list {
 			color: inherit !important;
-			background: transparent !important;
 		}
 
 		// Override justification dropdown menu positioning rules.
@@ -871,7 +870,8 @@ html.has-modal-open {
 @media (max-width: 600px) {
   .sagiriswd-tn .has-child .sagiriswd-tn__submenu-container{
     right: revert !important;
-    left: 10px !important;
+    left: 115% !important;
+		top: 0 !important;
   }
 }
 .sagiriswd-tn .has-child .sagiriswd-tn__submenu-container>.sagiriswd-tn-item>.sagiriswd-tn-item__content{
@@ -908,22 +908,16 @@ html.has-modal-open {
   }
 }
 .sagiriswd-tn .has-child .sagiriswd-tn-submenu__toggle[aria-expanded=true]~.sagiriswd-tn__submenu-container,.sagiriswd-tn .has-child:not(.open-on-click):hover>.sagiriswd-tn__submenu-container,.sagiriswd-tn .has-child:not(.open-on-click):not(.open-on-hover-click):focus-within>.sagiriswd-tn__submenu-container{
-  height:auto;
-  min-width:200px;
-  max-width:1920px;
-  opacity:1;
-  overflow:auto;
-  visibility:visible;
-  width:min-content;
+  height: auto;
+  max-width: 1920px;
+  opacity: 1;
+  overflow: auto;
+  visibility: visible;
+  width: clamp(200px, 50%, 1920px);
 
   // set minimum spacing on submenu items except inline elements
   *:not(p, a) {
     min-width: 50px;
-  }
-}
-@media (min-width:600px){
-  .sagiriswd-tn .has-child .sagiriswd-tn-submenu__toggle[aria-expanded=true]~.sagiriswd-tn__submenu-container,.sagiriswd-tn .has-child:not(.open-on-click):hover>.sagiriswd-tn__submenu-container,.sagiriswd-tn .has-child:not(.open-on-click):not(.open-on-hover-click):focus-within>.sagiriswd-tn__submenu-container{
-    min-width:500px;
   }
 }
 
@@ -1111,8 +1105,8 @@ button.sagiriswd-tn-item__content{
   flex-direction:column;
 }
 .sagiriswd-tn__responsive-container.is-menu-open .sagiriswd-tn-item,.sagiriswd-tn__responsive-container.is-menu-open .sagiriswd-tn-item .sagiriswd-tn__submenu-container,.sagiriswd-tn__responsive-container.is-menu-open .sagiriswd-tn__container,.sagiriswd-tn__responsive-container.is-menu-open .wp-block-page-list{
-  background:#0000 !important;
-  color:inherit !important;
+  // background:inherit !important;
+  // color:inherit !important;
 }
 .sagiriswd-tn__responsive-container.is-menu-open .sagiriswd-tn__submenu-container.sagiriswd-tn__submenu-container.sagiriswd-tn__submenu-container.sagiriswd-tn__submenu-container{
   left:auto;
@@ -1123,7 +1117,7 @@ button.sagiriswd-tn-item__content{
     background-color:inherit;
     display:block;
     position:relative;
-    width:fit-content;
+		width: 100%;
     z-index:auto;
   }
   .sagiriswd-tn__responsive-container:not(.hidden-by-default):not(.is-menu-open) .sagiriswd-tn__responsive-container-close{

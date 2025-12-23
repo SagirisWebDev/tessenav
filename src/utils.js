@@ -13,10 +13,11 @@ import {
 	Platform
 } from '@wordpress/element';
 import {
-		__experimentalColorGradientSettingsDropdown as ColorGradientSettingsDropdown,
-		__experimentalUseMultipleOriginColorsAndGradients as useMultipleOriginColorsAndGradients,
-		ContrastChecker
+	__experimentalColorGradientSettingsDropdown as ColorGradientSettingsDropdown,
+	__experimentalUseMultipleOriginColorsAndGradients as useMultipleOriginColorsAndGradients,
+	ContrastChecker,
 } from '@wordpress/block-editor';
+
 
 function getComputedStyle( node ) {
 	return node.ownerDocument.defaultView.getComputedStyle( node );
@@ -104,7 +105,7 @@ export function getColors( context, isSubMenu ) {
 	return colors;
 }
 
- export function ColorTools( {
+export function ColorTools( {
 	textColor,
 	setTextColor,
 	backgroundColor,
@@ -241,7 +242,7 @@ export function getSubmenuChildBlockProps( innerProps ) {
 			color: innerProps.customTextColor,
 			backgroundColor: innerProps.customBackgroundColor,
 			left: innerProps.left,
-			right: innerProps.right
+			right: innerProps.right,
 		},
 	};
 }

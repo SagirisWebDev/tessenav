@@ -33,15 +33,15 @@ import { useMergeRefs, usePrevious, useResizeObserver } from '@wordpress/compose
 /**
  * Internal dependencies
  */
-import { ItemSubmenuIcon } from './icons';
-import { LinkUI } from '../tessenav-link/link-ui';
-import { updateAttributes } from '../update-attributes';
-import { Controls } from '../controls';
+import { ItemSubmenuIcon } from '../icons';
+import { LinkUI } from './link-ui';
+import { updateAttributes } from '../../update-attributes';
+import { Controls } from '../../controls';
 import {
 	getColors,
 	getSubmenuChildBlockProps,
-} from '../utils';
-import { DEFAULT_BLOCK } from '../constants';
+} from '../../utils';
+import { DEFAULT_BLOCK } from '../../constants';
 
 const ALLOWED_BLOCKS = [
 	'sagiriswd/tessenav-link',
@@ -339,11 +339,14 @@ export default function Edit( {
 			'is-dragging-within': isDraggingWithin,
 			'has-link': !! url,
 			'has-child': hasChildren,
-			'has-text-color': !! textColor || !! customTextColor,
-			[ getColorClassName( 'color', textColor ) ]: !! textColor,
-			'has-background': !! backgroundColor || customBackgroundColor,
+			'has-text-color': !! attributes.textColor || !! textColor || !! customTextColor,
+			[ getColorClassName( 'color', attributes.textColor ) ]: !! attributes.textColor,
+			[ getColorClassName( 'color', textColor ) ]: !! textColor && !! attributes.textColor === false,
+			'has-background': !! attributes.backgroundColor || !! backgroundColor || customBackgroundColor,
+			[ getColorClassName( 'background-color', attributes.backgroundColor ) ]:
+				!! attributes.backgroundColor,
 			[ getColorClassName( 'background-color', backgroundColor ) ]:
-				!! backgroundColor,
+				!! backgroundColor && !! attributes.backgroundColor === false,
 			'open-on-click': openSubmenusOnClick,
 		} ),
 		style: {

@@ -7,10 +7,7 @@ import clsx from 'clsx';
  * WordPress dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-import {
-	ToolbarButton,
-	ToolbarGroup,
-} from '@wordpress/components';
+import { ToolbarButton, ToolbarGroup } from '@wordpress/components';
 import { displayShortcut, isKeyboardEvent } from '@wordpress/keycodes';
 import { __ } from '@wordpress/i18n';
 import {
@@ -25,10 +22,9 @@ import {
 } from '@wordpress/block-editor';
 import { isURL, prependHTTP } from '@wordpress/url';
 import { useState, useEffect, useRef } from '@wordpress/element';
-import { link as linkIcon, removeSubmenu } from '@wordpress/icons';
+import { link as linkIcon } from '@wordpress/icons';
 import { speak } from '@wordpress/a11y';
-import { createBlock } from '@wordpress/blocks';
-import { useMergeRefs, usePrevious, useResizeObserver } from '@wordpress/compose';
+import { useMergeRefs, usePrevious } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -37,10 +33,7 @@ import { ItemSubmenuIcon } from '../icons';
 import { LinkUI } from './link-ui';
 import { updateAttributes } from '../../update-attributes';
 import { Controls } from '../../controls';
-import {
-	getColors,
-	getSubmenuChildBlockProps,
-} from '../../utils';
+import { getColors, getSubmenuChildBlockProps } from '../../utils';
 import { DEFAULT_BLOCK } from '../../constants';
 
 const ALLOWED_BLOCKS = [
@@ -50,7 +43,7 @@ const ALLOWED_BLOCKS = [
 	'core/stack',
 	'core/columns',
 	'core/grid',
-	'core/paragraph'
+	'core/paragraph',
 ];
 
 /**
@@ -99,11 +92,10 @@ const useIsDraggingWithin = ( elementRef ) => {
 			ownerDocument.removeEventListener( 'dragend', handleDragEnd );
 			ownerDocument.removeEventListener( 'dragenter', handleDragEnter );
 		};
-	}, [] );
+	},  );
 
 	return isDraggingWithin;
 };
-
 /**
  * @typedef {'post-type'|'custom'|'taxonomy'|'post-type-archive'} WPNavigationLinkKind
  */
@@ -131,26 +123,11 @@ export default function Edit( {
 	context,
 	clientId,
 } ) {
-	const {
-		label,
-		url,
-		description,
-		title,
-		id,
-		kind,
-		type,
-		rel,
-		opensInNewTab,
-		isTopLevelLink
-	} = attributes;
+	const { label, url, description } = attributes;
 
 	const { showSubmenuIcon, maxNestingLevel, openSubmenusOnClick } = context;
 
-	const {
-		__unstableMarkNextChangeAsNotPersistent,
-		replaceBlock,
-		selectBlock,
-	} = useDispatch( blockEditorStore );
+	const { selectBlock } = useDispatch( blockEditorStore );
 	const [ isSubmenuOpen, setIsSubmenuOpen ] = useState( false );
 	const [ isLinkUIOpen, setIsLinkUIOpen ] = useState( false );
 	// Store what element opened the popover, so we know where to return focus to (toolbar button vs navigation link text)
@@ -171,7 +148,7 @@ export default function Edit( {
 		selectedBlockHasChildren,
 		onlyDescendantIsEmptyLink,
 		isParentSelected,
-		isInSecondHalf
+		isInSecondHalf,
 	} = useSelect(
 		( select ) => {
 			const {
@@ -181,7 +158,7 @@ export default function Edit( {
 				getBlock,
 				getBlockIndex,
 				getBlockCount,
-				getBlockOrder
+				getBlockOrder,
 			} = select( blockEditorStore );
 
 			let _onlyDescendantIsEmptyLink;
@@ -203,14 +180,20 @@ export default function Edit( {
 
 			let isInSecondHalf = false;
 
-			const parentBlock = getBlockParentsByBlockName(clientId, 'sagiriswd/tessenav');
+			const parentBlock = getBlockParentsByBlockName(
+				clientId,
+				'sagiriswd/tessenav'
+			);
 
 			if ( parentBlock.length >= 1 ) {
 				const desktop = window.innerWidth >= 600;
-				const pid = parentBlock[0];
-				const childCount = getBlockCount(pid);
+				const pid = parentBlock[ 0 ];
+				const childCount = getBlockCount( pid );
 				const index = getBlockIndex( clientId ) + 1;
-				isInSecondHalf = desktop && childCount > 2  && ( childCount / index ) < 1.5 ? true : false;
+				isInSecondHalf =
+					desktop && childCount > 2 && childCount / index < 1.5
+						? true
+						: false;
 			}
 
 			return {
@@ -230,38 +213,49 @@ export default function Edit( {
 				selectedBlockHasChildren: !! selectedBlockChildren?.length,
 				onlyDescendantIsEmptyLink: _onlyDescendantIsEmptyLink,
 				isParentSelected: selectedBlockId === clientId,
-				isInSecondHalf: isInSecondHalf
+				isInSecondHalf,
 			};
 		},
 		[ clientId ]
 	);
 	useEffect( () => {
-		setAttributes( { isInSecondHalf: isInSecondHalf } );
-	}, [ attributes[ 'isInSecondHalf' ] ] )
-
-	const prevHasChildren = usePrevious( hasChildren );
+		setAttributes( { isInSecondHalf } );
+	}, [ isInSecondHalf ] );
 
 	/**
 	 * Opens the submenu when an innerblock is selected in the List View, otherwise the block supports don't show.
 	 */
-	const { hasSelectedInnerBlock } = useSelect( ( select ) => {
-		const s = select( blockEditorStore );
-		return {
-			hasSelectedInnerBlock: s.hasSelectedInnerBlock( clientId, true ),
-		};
-	}, [ clientId ] );
+	const { hasSelectedInnerBlock } = useSelect(
+		( select ) => {
+			const s = select( blockEditorStore );
+			return {
+				hasSelectedInnerBlock: s.hasSelectedInnerBlock(
+					clientId,
+					true
+				),
+			};
+		},
+		[ clientId ]
+	);
 
 	useEffect( () => {
-		if ( hasSelectedInnerBlock ) setIsSubmenuOpen( true );
-	}, [ hasSelectedInnerBlock ]);
+		if ( hasSelectedInnerBlock ) {
+			setIsSubmenuOpen( true );
+		}
+	}, [ hasSelectedInnerBlock ] );
 
 	/**
 	 * Prevents the block supports of this block from appearing in nested core/navigation and core/navigation-submenu block supports
 	 */
-	useSelect( ( select ) => {
-		const s = select( blockEditorStore );
-		return { nestedNavSelected: s.getSelectedBlockClientId() === clientId };
-  }, [ clientId ] );
+	useSelect(
+		( select ) => {
+			const s = select( blockEditorStore );
+			return {
+				nestedNavSelected: s.getSelectedBlockClientId() === clientId,
+			};
+		},
+		[ clientId ]
+	);
 
 	// Show the Submenu on mount if the URL is empty
 	// ( When adding a new menu item)
@@ -271,7 +265,7 @@ export default function Edit( {
 		if ( ! openSubmenusOnClick && label ) {
 			setIsSubmenuOpen( true );
 		}
-	}, [] );
+	}, [ openSubmenusOnClick, label ] );
 
 	/**
 	 * The hook shouldn't be necessary but due to a focus loss happening
@@ -286,7 +280,7 @@ export default function Edit( {
 	// If the submenu popover is open and the label has changed, close the submenu and focus the label text.
 	useEffect( () => {
 		if ( isSubmenuOpen && url ) {
-						// Does this look like a URL and have something TLD-ish?
+			// Does this look like a URL and have something TLD-ish?
 			if (
 				isURL( prependHTTP( label ) ) &&
 				/^.+\.[a-z]+/.test( label )
@@ -295,7 +289,7 @@ export default function Edit( {
 				selectLabelText();
 			}
 		}
-	}, [ url ] );
+	}, [ isSubmenuOpen, url, label ] );
 
 	/**
 	 * Focus the Link label text and select it.
@@ -339,12 +333,20 @@ export default function Edit( {
 			'is-dragging-within': isDraggingWithin,
 			'has-link': !! url,
 			'has-child': hasChildren,
-			'has-text-color': !! attributes.textColor || !! textColor || !! customTextColor,
-			[ getColorClassName( 'color', attributes.textColor ) ]: !! attributes.textColor,
-			[ getColorClassName( 'color', textColor ) ]: !! textColor && !! attributes.textColor === false,
-			'has-background': !! attributes.backgroundColor || !! backgroundColor || customBackgroundColor,
-			[ getColorClassName( 'background-color', attributes.backgroundColor ) ]:
-				!! attributes.backgroundColor,
+			'has-text-color':
+				!! attributes.textColor || !! textColor || !! customTextColor,
+			[ getColorClassName( 'color', attributes.textColor ) ]:
+				!! attributes.textColor,
+			[ getColorClassName( 'color', textColor ) ]:
+				!! textColor && !! attributes.textColor === false,
+			'has-background':
+				!! attributes.backgroundColor ||
+				!! backgroundColor ||
+				customBackgroundColor,
+			[ getColorClassName(
+				'background-color',
+				attributes.backgroundColor
+			) ]: !! attributes.backgroundColor,
 			[ getColorClassName( 'background-color', backgroundColor ) ]:
 				!! backgroundColor && !! attributes.backgroundColor === false,
 			'open-on-click': openSubmenusOnClick,
@@ -364,36 +366,33 @@ export default function Edit( {
 	// Always use overlay colors for submenus.
 	const innerBlocksColors = getColors( attributes, true );
 
-
 	// Set anchor positions for submenus
 	const pos = isInSecondHalf
-							? {
-								left: 'revert',
-								right: '0px'
-							} : {
-								right: 'revert',
-								left: '0px'
-							};
+		? {
+				left: 'revert',
+				right: '0px',
+		  }
+		: {
+				right: 'revert',
+				left: '0px',
+		  };
 	const innerProps = { innerBlocksColors, ...pos };
 	const allowedBlocks =
 		parentCount >= maxNestingLevel
 			? ALLOWED_BLOCKS.filter(
-					( blockName ) => blockName !== (
-						'sagiriswd/tessenav-submenu' ||
-						'core/group' ||
-						'core/row' ||
-						'core/stack' ||
-						'core/columns' ||
-						'core/grid'
-					)
+					( blockName ) =>
+						blockName !==
+						( 'sagiriswd/tessenav-submenu' ||
+							'core/group' ||
+							'core/row' ||
+							'core/stack' ||
+							'core/columns' ||
+							'core/grid' )
 			  )
 			: ALLOWED_BLOCKS;
 
-	const submenuChildBlockProps =
-		getSubmenuChildBlockProps( innerProps );
-	const innerBlocksProps = useInnerBlocksProps(
-		submenuChildBlockProps,
-		{
+	const submenuChildBlockProps = getSubmenuChildBlockProps( innerProps );
+	const innerBlocksProps = useInnerBlocksProps( submenuChildBlockProps, {
 		allowedBlocks,
 		defaultBlock: DEFAULT_BLOCK,
 		directInsert: true,
@@ -404,43 +403,12 @@ export default function Edit( {
 		__experimentalCaptureToolbars: true,
 
 		renderAppender:
-			( ! isImmediateParentOfSelectedBlock &&
-				isParentSelected )
+			! isImmediateParentOfSelectedBlock && isParentSelected
 				? InnerBlocks.ButtonBlockAppender
 				: false,
 	} );
 
 	const ParentElement = openSubmenusOnClick ? 'button' : 'a';
-
-	function transformToTesseNavLink() {
-		const newLinkBlock = createBlock( 'sagiriswd/tessenav-link', {
-			label: itemLabelPlaceholder,
-			url: url,
-			title: title,
-			description: description,
-			id: id,
-			kind: kind,
-			type: type,
-			opensInNewTab: opensInNewTab,
-			rel: rel,
-			isTopLevelLink: isTopLevelLink
-		} );
-		replaceBlock( clientId, newLinkBlock );
-		setIsLinkUIOpen( true );
-	}
-
-	useEffect( () => {
-		// If block becomes empty, transform to TesseNavLink.
-		if ( ! hasChildren && prevHasChildren ) {
-			// This side-effect should not create an undo level as those should
-			// only be created via user interactions.
-			__unstableMarkNextChangeAsNotPersistent();
-			transformToTesseNavLink();
-		}
-	}, [ hasChildren, prevHasChildren ] );
-
-	const canConvertToLink =
-		! selectedBlockHasChildren || onlyDescendantIsEmptyLink;
 
 	return (
 		<>
@@ -458,15 +426,6 @@ export default function Edit( {
 							} }
 						/>
 					) }
-
-					<ToolbarButton
-						name="revert"
-						icon={ removeSubmenu }
-						title={ __( 'Convert to Link' ) }
-						onClick={ transformToTesseNavLink }
-						className="sagiriswd-tn-submenu__revert"
-						disabled={ ! canConvertToLink }
-					/>
 				</ToolbarGroup>
 			</BlockControls>
 			<InspectorControls group="settings">

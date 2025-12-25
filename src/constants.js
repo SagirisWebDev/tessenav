@@ -1,10 +1,10 @@
 export const DEFAULT_BLOCK = {
-	name: 'core/paragraph'
+	name: 'core/paragraph',
 };
 
 export const PRIORITIZED_INSERTER_BLOCKS = [
 	'sagiriswd/tessenav-link',
-	'core/group'
+	'core/group',
 ];
 
 // These parameters must be kept aligned with those in

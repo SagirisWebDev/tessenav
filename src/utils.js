@@ -7,17 +7,12 @@ import clsx from 'clsx';
  * Wordpress Dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	useState,
-	useEffect,
-	Platform
-} from '@wordpress/element';
+import { useState, useEffect, Platform } from '@wordpress/element';
 import {
 	__experimentalColorGradientSettingsDropdown as ColorGradientSettingsDropdown,
 	__experimentalUseMultipleOriginColorsAndGradients as useMultipleOriginColorsAndGradients,
 	ContrastChecker,
 } from '@wordpress/block-editor';
-
 
 function getComputedStyle( node ) {
 	return node.ownerDocument.defaultView.getComputedStyle( node );
@@ -229,11 +224,9 @@ export function getSubmenuChildBlockProps( innerProps ) {
 			'has-text-color': !! (
 				innerProps.textColor || innerProps.customTextColor
 			),
-			[ `has-${ innerProps.textColor }-color` ]:
-				!! innerProps.textColor,
+			[ `has-${ innerProps.textColor }-color` ]: !! innerProps.textColor,
 			'has-background': !! (
-				innerProps.backgroundColor ||
-				innerProps.customBackgroundColor
+				innerProps.backgroundColor || innerProps.customBackgroundColor
 			),
 			[ `has-${ innerProps.backgroundColor }-background-color` ]:
 				!! innerProps.backgroundColor,

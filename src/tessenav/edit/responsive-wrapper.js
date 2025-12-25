@@ -59,10 +59,9 @@ export default function ResponsiveWrapper( {
 			overlayBackgroundColor.color,
 	};
 
-	const openButtonClasses = clsx(
-		'sagiriswd-tn__responsive-container-open',
-		{ 'always-shown': isHiddenByDefault }
-	);
+	const openButtonClasses = clsx( 'sagiriswd-tn__responsive-container-open', {
+		'always-shown': isHiddenByDefault,
+	} );
 
 	const modalId = `${ id }-modal`;
 
@@ -95,10 +94,7 @@ export default function ResponsiveWrapper( {
 				style={ styles }
 				id={ modalId }
 			>
-				<div
-					className="sagiriswd-tn__responsive-close"
-					tabIndex="-1"
-				>
+				<div className="sagiriswd-tn__responsive-close" tabIndex="-1">
 					<div { ...dialogProps }>
 						<Button
 							__next40pxDefaultSize

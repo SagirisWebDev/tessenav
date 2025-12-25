@@ -6,11 +6,7 @@ import clsx from 'clsx';
 /**
  * WordPress dependencies
  */
-import {
-	useState,
-	useEffect,
-	useRef,
-} from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import {
 	InspectorControls,
 	useBlockProps,
@@ -49,8 +45,6 @@ import { ColorTools } from '../../utils';
 import AccessibleMenuDescription from './accessible-menu-description';
 import { useToolsPanelDropdownMenuProps } from '../../hooks';
 
-
-
 function Edit( {
 	attributes,
 	setAttributes,
@@ -68,7 +62,7 @@ function Edit( {
 	// These props are used by the navigation editor to override specific
 	// navigation block settings.
 	hasSubmenuIndicatorSetting = true,
-	customPlaceholder: CustomPlaceholder = null,
+	// customPlaceholder: // CustomPlaceholder = null,
 	__unstableLayoutClassNames: layoutClassNames,
 } ) {
 	const {
@@ -115,7 +109,7 @@ function Edit( {
 	const blockProps = useBlockProps( {
 		ref: navRef,
 		className: clsx(
-			`${className} sagiriswd-tn`,
+			`${ className } sagiriswd-tn`,
 			{
 				'items-justified-right': justifyContent === 'right',
 				'items-justified-space-between':
@@ -145,14 +139,25 @@ function Edit( {
 		},
 	} );
 
-	const innerBlocksProps = useInnerBlocksProps(   {
-    className: 'sagiriswd-tn__inner',   // (optional) your own class on the inner wrapper
-  },
-  {
-    allowedBlocks: [ 'sagiriswd/tessenav-submenu', 'core/navigation', 'core/paragraph', 'core/row', 'core/stack', 'core/group', 'core/columns', 'core/grid' ],
-    templateLock: false,
-    renderAppender: InnerBlocks.ButtonBlockAppender,
-  } )
+	const innerBlocksProps = useInnerBlocksProps(
+		{
+			className: 'sagiriswd-tn__inner', // (optional) your own class on the inner wrapper
+		},
+		{
+			allowedBlocks: [
+				'sagiriswd/tessenav-submenu',
+				'core/navigation',
+				'core/paragraph',
+				'core/row',
+				'core/stack',
+				'core/group',
+				'core/columns',
+				'core/grid',
+			],
+			templateLock: false,
+			renderAppender: InnerBlocks.ButtonBlockAppender,
+		}
+	);
 
 	const overlayMenuPreviewClasses = clsx(
 		'sagiriswd-tn__overlay-menu-preview',
@@ -387,9 +392,7 @@ function Edit( {
 				{ ...blockProps }
 				aria-describedby={ accessibleDescriptionId }
 			>
-				<AccessibleMenuDescription
-					id={ accessibleDescriptionId }
-				/>
+				<AccessibleMenuDescription id={ accessibleDescriptionId } />
 				<ResponsiveWrapper
 					id={ clientId }
 					onToggle={ setResponsiveMenuVisibility }
@@ -398,9 +401,7 @@ function Edit( {
 					isOpen={ isResponsiveMenuOpen }
 					isResponsive={ isResponsive }
 					isHiddenByDefault={ isHiddenByDefault }
-					overlayBackgroundColor={
-						overlayBackgroundColor
-					}
+					overlayBackgroundColor={ overlayBackgroundColor }
 					overlayTextColor={ overlayTextColor }
 				>
 					<div { ...innerBlocksProps } />

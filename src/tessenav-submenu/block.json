@@ -7,6 +7,15 @@
 	"category": "design",
 	"parent": [ "sagiriswd/tessenav", "sagiriswd/tessenav-submenu" ],
 	"description": "Add a submenu to TesseNav.",
+	"allowedBlocks": [
+		"sagiriswd/tessenav-submenu",
+		"core/group",
+		"core/row",
+		"core/stack",
+		"core/columns",
+		"core/grid",
+		"core/paragraph"
+	],
 	"keywords": [ "submenu", "navigation", "mega menu", "links" ],
 	"example": {},
 	"attributes": {
@@ -39,9 +48,9 @@
 		"isTopLevelItem": {
 			"type": "boolean"
 		},
-    "customPanelWidth": {
-			"type": "number",
-			"default": 0
+    "menuMaxWidth": {
+			"type": "string",
+			"default": "200px"
 		},
 		"isInSecondHalf": {
 			"type": "boolean",
@@ -86,6 +95,10 @@
 			"__experimentalDefaultControls": {
 				"fontSize": true
 			}
+		},
+		"color": {
+			"gradients": true,
+			"link": true
 		},
 		"layout": {
 			"default": {

@@ -7,7 +7,8 @@ import clsx from 'clsx';
  * WordPress dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-import { ToolbarButton, ToolbarGroup } from '@wordpress/components';
+import { ToolbarButton, ToolbarGroup, __experimentalToolsPanel as ToolsPanel, __experimentalToolsPanelItem as ToolsPanelItem,
+  __experimentalUnitControl as UnitControl } from '@wordpress/components';
 import { displayShortcut, isKeyboardEvent } from '@wordpress/keycodes';
 import { __ } from '@wordpress/i18n';
 import {
@@ -37,7 +38,6 @@ import { getColors, getSubmenuChildBlockProps } from '../../utils';
 import { DEFAULT_BLOCK } from '../../constants';
 
 const ALLOWED_BLOCKS = [
-	'sagiriswd/tessenav-link',
 	'core/group',
 	'core/row',
 	'core/stack',
@@ -123,15 +123,17 @@ export default function Edit( {
 	context,
 	clientId,
 } ) {
-	const { label, url, description } = attributes;
+	const { label, url, description, menuMaxWidth, allowedBlocks } = attributes;
 
 	const { showSubmenuIcon, maxNestingLevel, openSubmenusOnClick } = context;
 
 	const { selectBlock } = useDispatch( blockEditorStore );
 	const [ isSubmenuOpen, setIsSubmenuOpen ] = useState( false );
 	const [ isLinkUIOpen, setIsLinkUIOpen ] = useState( false );
+
 	// Store what element opened the popover, so we know where to return focus to (toolbar button vs navigation link text)
 	const [ openedBy, setOpenedBy ] = useState( null );
+
 	// Use internal state instead of a ref to make sure that the component
 	// re-renders when the popover's anchor updates.
 	const [ popoverAnchor, setPopoverAnchor ] = useState( null );
@@ -139,6 +141,14 @@ export default function Edit( {
 	const isDraggingWithin = useIsDraggingWithin( listItemRef );
 	const itemLabelPlaceholder = __( 'Add text…' );
 	const ref = useRef();
+
+	// Initialize block editor canvas width
+	const [canvasWidth, setCanvasWidth] = useState(0);
+	const canvas = document.querySelector('.editor-visual-editor');
+	let region = document.querySelector('.editor-styles-wrapper');
+	if ( canvas.classList.contains('is-iframed') ) {
+		region = document.querySelector('iframe[name="editor-canvas"]');
+	}
 
 	const {
 		parentCount,
@@ -291,6 +301,26 @@ export default function Edit( {
 		}
 	}, [ isSubmenuOpen, url, label ] );
 
+	// Monitor the width of the block editor canvas, used to set width of the submenu container on mobile devices
+	useEffect(() => {
+			if (!region) return;
+
+			// Use ResizeObserver to detect changes (e.g., sidebar opening/closing)
+			const observer = new ResizeObserver((entries) => {
+				for (let entry of entries) {
+
+					// entry.contentRect.width is the standard measurement
+					setCanvasWidth(entry.contentRect.width);
+				}
+			});
+
+			observer.observe(region);
+
+			return () => observer.disconnect();
+	}, [ region ] );
+	
+	const isMobileCanvas = canvasWidth < 600;
+
 	/**
 	 * Focus the Link label text and select it.
 	 */
@@ -376,24 +406,18 @@ export default function Edit( {
 				right: 'revert',
 				left: '0px',
 		  };
-	const innerProps = { innerBlocksColors, ...pos };
-	const allowedBlocks =
-		parentCount >= maxNestingLevel
-			? ALLOWED_BLOCKS.filter(
-					( blockName ) =>
-						blockName !==
-						( 'sagiriswd/tessenav-submenu' ||
-							'core/group' ||
-							'core/row' ||
-							'core/stack' ||
-							'core/columns' ||
-							'core/grid' )
-			  )
-			: ALLOWED_BLOCKS;
+	const isValidMenuWidth = ( !! menuMaxWidth );
+	const menuWidth = { width: isValidMenuWidth ? menuMaxWidth : '200px' }
+	const innerProps = { innerBlocksColors, ...pos, ...menuWidth };
+
+	const isAtMaxNesting = parentCount >= maxNestingLevel - 1;
+	const effectiveAllowedBlocks = isAtMaxNesting
+		? ALLOWED_BLOCKS
+		: [ ...ALLOWED_BLOCKS, 'sagiriswd/tessenav-submenu' ];
 
 	const submenuChildBlockProps = getSubmenuChildBlockProps( innerProps );
 	const innerBlocksProps = useInnerBlocksProps( submenuChildBlockProps, {
-		allowedBlocks,
+		allowedBlocks: effectiveAllowedBlocks,
 		defaultBlock: DEFAULT_BLOCK,
 		directInsert: true,
 
@@ -433,6 +457,30 @@ export default function Edit( {
 					attributes={ attributes }
 					setAttributes={ setAttributes }
 				/>
+				<ToolsPanel label={ __( 'Submenu Width' ) } resetAll={ () => {
+				setAttributes( { menuMaxWidth: 200 } );
+			} }>
+				<div>{ __('Set the width of the menu on desktop and laptops') }</div>
+				<div>{ __('Minimum: 200px') }<br />{ __('Maximum: 1920px') }</div>
+				{<div><strong>{ __('The width of all menus on mobile devices is 200px') }</strong></div>}
+				<ToolsPanelItem
+					hasValue={ () => menuMaxWidth !== undefined }
+					label={ __( 'Width' ) }
+					onDeselect={ () => {} }
+					isShownByDefault
+				>
+					<UnitControl
+						label={ __( 'Width' ) }
+						__next40pxDefaultSize
+						value={ menuMaxWidth || '200px' }
+						onChange={ ( nextWidth ) => {
+							nextWidth =
+							( isMobileCanvas || 200 > parseFloat( nextWidth ) || 1920 < parseFloat( nextWidth ) ) ? '200px' : nextWidth;
+							setAttributes( { menuMaxWidth: nextWidth } );
+						} }
+					/>
+					</ToolsPanelItem>
+				</ToolsPanel>
 			</InspectorControls>
 			<div { ...blockProps }>
 				{ /* eslint-disable jsx-a11y/anchor-is-valid */ }

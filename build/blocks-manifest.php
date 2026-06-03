@@ -276,6 +276,15 @@ return array(
 			'sagiriswd/tessenav-submenu'
 		),
 		'description' => 'Add a submenu to TesseNav.',
+		'allowedBlocks' => array(
+			'sagiriswd/tessenav-submenu',
+			'core/group',
+			'core/row',
+			'core/stack',
+			'core/columns',
+			'core/grid',
+			'core/paragraph'
+		),
 		'keywords' => array(
 			'submenu',
 			'navigation',
@@ -315,9 +324,9 @@ return array(
 			'isTopLevelItem' => array(
 				'type' => 'boolean'
 			),
-			'customPanelWidth' => array(
-				'type' => 'number',
-				'default' => 0
+			'menuMaxWidth' => array(
+				'type' => 'string',
+				'default' => '200px'
 			),
 			'isInSecondHalf' => array(
 				'type' => 'boolean',
@@ -362,6 +371,10 @@ return array(
 				'__experimentalDefaultControls' => array(
 					'fontSize' => true
 				)
+			),
+			'color' => array(
+				'gradients' => true,
+				'link' => true
 			),
 			'layout' => array(
 				'default' => array(

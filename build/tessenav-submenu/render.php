@@ -243,21 +243,26 @@ if ( ! function_exists( 'sagiriswd_tessenav_submenu_render_submenu_icon') ) {
 			$css_classes .= ' ' . $colors_supports['class'];
 		}
 
-
-
 		$style_attribute = '';
 
 		if ( array_key_exists( 'style', $colors_supports ) ) {
 			$style_attribute = $colors_supports['style'];
 		}
+
+		if ( array_key_exists( 'isInSecondHalf', $attributes ) ) {
+			$is_in_second_half = $attributes[ 'isInSecondHalf' ];
+			$pos = $is_in_second_half ? 'left:revert;right:0px;' : 'right:revert;left:0px;';
+			$style_attribute .= $pos;
+		}
 		// echo '<pre>';
-		// var_dump($attributes);
+		// echo $attributes['menuMaxWidth'];
 		// echo '</pre>';
 		// wp_die();
-		if ( array_key_exists( 'isInSecondHalf', $attributes ) ) {
-			$isInSecondHalf = $attributes[ 'isInSecondHalf' ];
-			$pos = $isInSecondHalf ? 'left:revert;right:0px;' : 'right:revert;left:0px;';
-			$style_attribute .= $pos;
+
+		if ( array_key_exists( 'menuMaxWidth', $attributes ) ) {
+			$menu_width = $attributes[ 'menuMaxWidth' ];
+			$menu_width_string = sprintf( 'width:%1$s;', $menu_width );
+			$style_attribute .= $menu_width_string;
 		}
 		
 		$inner_blocks_html = '';

@@ -18,6 +18,7 @@ import { registerBlockType } from '@wordpress/blocks';
 */
 import Edit from './edit';
 import save from './save';
+import deprecated from './deprecated';
 import metadata from './block.json';
 import icon from './icon';
 import './style.scss';
@@ -41,4 +42,6 @@ registerBlockType( metadata.name, {
 	 * @see ./save.js
 	 */
 	save,
+
+	deprecated,
 } );

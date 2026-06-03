@@ -31,3 +31,7 @@ node_modules/
 
 # Agent harness (local tooling, not part of the plugin)
 .swd-harness
+
+# PHP dependencies
+vendor/
+composer.lock

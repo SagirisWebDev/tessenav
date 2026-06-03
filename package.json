@@ -12,7 +12,11 @@
 		"lint:js": "wp-scripts lint-js",
 		"packages-update": "wp-scripts packages-update",
 		"plugin-zip": "wp-scripts plugin-zip",
-		"start": "wp-scripts start --blocks-manifest --experimental-modules"
+		"start": "wp-scripts start --blocks-manifest --experimental-modules",
+		"test:unit": "jest",
+		"test:php": "bash bin/phpunit.sh",
+		"test:browser": "playwright test",
+		"test:browser:headed": "playwright test --headed"
 	},
 	"dependencies": {
 		"@wordpress/interactivity": "latest"

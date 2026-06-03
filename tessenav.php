@@ -17,6 +17,69 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+
+define( 'TESSENAV_GRACE_PERIOD_DAYS', 30 );
+define( 'TESSENAV_UPGRADE_URL', 'https://example.com/upgrade' ); // placeholder
+
+/**
+ * Returns the current premium status for TesseNav.
+ *
+ * @return array{ isPremium: bool, inGracePeriod: bool, graceDaysRemaining: int }
+ */
+function sagiriswd_tessenav_premium_status() {
+	$plugin_active = defined( 'SAGIRIS_PREMIUM_BLOCKS_VERSION' );
+	// Filterable for testing without being able to undefine constants.
+	$plugin_active = (bool) apply_filters( 'sagiriswd_tessenav_is_premium_plugin_active', $plugin_active );
+
+	if ( $plugin_active ) {
+		return array(
+			'isPremium'          => true,
+			'inGracePeriod'      => false,
+			'graceDaysRemaining' => 0,
+		);
+	}
+
+	$deactivated_at = get_option( 'tessenav_premium_deactivated_at' );
+
+	if ( ! $deactivated_at ) {
+		return array(
+			'isPremium'          => false,
+			'inGracePeriod'      => false,
+			'graceDaysRemaining' => 0,
+		);
+	}
+
+	$days_elapsed   = ( time() - (int) $deactivated_at ) / DAY_IN_SECONDS;
+	$days_remaining = (int) ceil( TESSENAV_GRACE_PERIOD_DAYS - $days_elapsed );
+
+	if ( $days_remaining > 0 ) {
+		return array(
+			'isPremium'          => false,
+			'inGracePeriod'      => true,
+			'graceDaysRemaining' => $days_remaining,
+		);
+	}
+
+	return array(
+		'isPremium'          => false,
+		'inGracePeriod'      => false,
+		'graceDaysRemaining' => 0,
+	);
+}
+
+function sagiriswd_tessenav_enqueue_editor_settings() {
+	$status = sagiriswd_tessenav_premium_status();
+	wp_localize_script(
+		'sagiriswd-tessenav-editor-script',
+		'tessenavSettings',
+		array(
+			'isPremium'  => $status['isPremium'],
+			'upgradeUrl' => TESSENAV_UPGRADE_URL,
+		)
+	);
+}
+add_action( 'enqueue_block_editor_assets', 'sagiriswd_tessenav_enqueue_editor_settings' );
+
 /**
  * Registers the block using a `blocks-manifest.php` file, which improves the performance of block type registration.
  * Behind the scenes, it also registers all assets so they can be enqueued

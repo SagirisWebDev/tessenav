@@ -57,6 +57,20 @@ const { state, actions } = store(
 					? ctx.overlayOpenedBy
 					: ctx.submenuOpenedBy;
 			},
+			// Navigator state.
+			currentScreen: 'root',
+			screenHistory: [],
+			_navDirection: null,
+			get isCurrentScreen() {
+				const ctx = getContext();
+				return state.currentScreen === ( ctx.screenId ?? 'root' );
+			},
+			get isNavigatingForward() {
+				return state._navDirection === 'forward';
+			},
+			get isNavigatingBack() {
+				return state._navDirection === 'back';
+			},
 		},
 		actions: {
 			openMenuOnHover() {
@@ -158,6 +172,17 @@ const { state, actions } = store(
 						event.target !== window.document.activeElement &&
 						type === 'submenu' )
 				) {
+					// When a navigator screen transition hides the focused element
+					// (display:none on the parent screen), the browser drops focus
+					// producing relatedTarget=null. Detect this by checking offsetParent:
+					// a visible element has a non-null offsetParent; a hidden one does not.
+					if (
+						type === 'overlay' &&
+						event.relatedTarget === null &&
+						event.target?.offsetParent === null
+					) {
+						return;
+					}
 					actions.closeMenu( 'click' );
 					actions.closeMenu( 'focus' );
 				}
@@ -188,7 +213,26 @@ const { state, actions } = store(
 						document.documentElement.classList.remove(
 							'has-modal-open'
 						);
+						// Reset navigator to root when overlay closes.
+						state.currentScreen = 'root';
+						state.screenHistory = [];
+						state._navDirection = null;
 					}
+				}
+			},
+			navigateTo() {
+				const { screenId } = getContext();
+				state.screenHistory = [ ...state.screenHistory, state.currentScreen ];
+				state._navDirection = 'forward';
+				state.currentScreen = screenId;
+			},
+			navigateBack() {
+				if ( state.screenHistory.length > 0 ) {
+					const history = [ ...state.screenHistory ];
+					const previous = history.pop();
+					state._navDirection = 'back';
+					state.screenHistory = history;
+					state.currentScreen = previous;
 				}
 			},
 		},

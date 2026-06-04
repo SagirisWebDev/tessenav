@@ -870,7 +870,7 @@ html.has-modal-open {
 @media (max-width: 600px) {
   .sagiriswd-tn .has-child .sagiriswd-tn__submenu-container{
     right: revert !important;
-    left: 115% !important;
+    left: 30% !important;
 		top: 0 !important;
   }
 }
@@ -913,12 +913,6 @@ html.has-modal-open {
   opacity: 1;
   overflow: auto;
   visibility: visible;
-  width: clamp(200px, 50%, 1920px);
-
-  // set minimum spacing on submenu items except inline elements
-  *:not(p, a) {
-    min-width: 50px;
-  }
 }
 
 .sagiriswd-tn.has-background .has-child .sagiriswd-tn__submenu-container{
@@ -1249,4 +1243,124 @@ html.has-modal-open{
 }
 .sagiriswd-tn .sagiriswd-tn-item{
   background-color:inherit;
+}
+
+// ─── Navigator UX (mobile drill-down overlay) ────────────────────────────────
+
+// Navigator wrapper is hidden by default; only shown inside the mobile overlay.
+.sagiriswd-tn__navigator-wrapper {
+  display: none;
+}
+
+// Show navigator when overlay opens (mobile).
+.sagiriswd-tn__responsive-container.is-menu-open .sagiriswd-tn__navigator-wrapper {
+  display: block;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+// When overlay is open, hide the normal container and show navigator instead.
+// Specificity must match the existing (0,3,0) rule that sets display:flex on
+// .sagiriswd-tn__responsive-container-content .sagiriswd-tn__container, so we
+// include __responsive-container-content in the path to match and override it.
+.sagiriswd-tn__responsive-container.is-menu-open .sagiriswd-tn__responsive-container-content .sagiriswd-tn__container {
+  display: none;
+}
+
+// On desktop the overlay is not truly modal, so keep showing normal container
+// and hide navigator.
+@include m.break-small() {
+  .sagiriswd-tn__responsive-container:not(.hidden-by-default) {
+    .sagiriswd-tn__navigator-wrapper {
+      display: none !important;
+    }
+    .sagiriswd-tn__container {
+      display: flex !important;
+    }
+  }
+}
+
+// Navigator container — clips screens and provides slide context.
+.sagiriswd-tn__navigator {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+// Individual screens — hidden by default, visible when active.
+.sagiriswd-tn__navigator-screen {
+  display: none;
+  flex-direction: column;
+
+  &.is-active {
+    display: flex;
+  }
+}
+
+// Slide animations (respects prefers-reduced-motion).
+@media not (prefers-reduced-motion) {
+  .sagiriswd-tn__navigator.is-navigating-forward .sagiriswd-tn__navigator-screen.is-active {
+    animation: tn-slide-in-right 0.25s ease forwards;
+  }
+  .sagiriswd-tn__navigator.is-navigating-back .sagiriswd-tn__navigator-screen.is-active {
+    animation: tn-slide-in-left 0.25s ease forwards;
+  }
+}
+
+@keyframes tn-slide-in-right {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes tn-slide-in-left {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+// Drill-down buttons (submenu items in a Navigator screen).
+.sagiriswd-tn__navigator-drill-down {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: currentColor;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0.5em 0;
+
+  svg {
+    flex-shrink: 0;
+    margin-left: 0.5em;
+    stroke: currentColor;
+    fill: none;
+  }
+}
+
+// Back button at the top of each non-root screen.
+.sagiriswd-tn__navigator-back {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  color: currentColor;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  padding: 0 0 0.75em 0;
+
+  svg {
+    flex-shrink: 0;
+    margin-right: 0.25em;
+    stroke: currentColor;
+    fill: none;
+  }
 }

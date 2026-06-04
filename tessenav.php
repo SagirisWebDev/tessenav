@@ -161,3 +161,139 @@ function sagiriswd_tessenav_block_init() {
 	}
 }
 add_action( 'init', 'sagiriswd_tessenav_block_init' );
+
+// ─── Navigator rendering helpers ─────────────────────────────────────────────
+// Loaded here so PHPUnit tests can call them without having to include the
+// block render template (which contains executable output code).
+
+if ( ! function_exists( 'sagiriswd_tessenav_assign_screen_ids' ) ) {
+	/**
+	 * DFS traversal assigning sequential screen IDs to all sagiriswd/tessenav-submenu
+	 * blocks.  Uses spl_object_id as a stable key per block instance.
+	 *
+	 * @param iterable $inner_blocks Blocks to traverse.
+	 * @param int      $index        Running counter, passed by reference.
+	 * @param array    $id_map       Map from spl_object_id to screen-N string.
+	 */
+	function sagiriswd_tessenav_assign_screen_ids( $inner_blocks, &$index, &$id_map ) {
+		foreach ( $inner_blocks as $block ) {
+			if ( 'sagiriswd/tessenav-submenu' === $block->name ) {
+				$id_map[ spl_object_id( $block ) ] = 'screen-' . $index++;
+				sagiriswd_tessenav_assign_screen_ids( $block->inner_blocks, $index, $id_map );
+			}
+		}
+	}
+}
+
+if ( ! function_exists( 'sagiriswd_tessenav_build_navigator_submenu_screens' ) ) {
+	/**
+	 * Recursively builds the HTML for each sagiriswd/tessenav-submenu screen.
+	 *
+	 * @param iterable $inner_blocks Blocks to traverse.
+	 * @param array    $id_map       Map from spl_object_id to screen-N string.
+	 * @return string HTML string.
+	 */
+	function sagiriswd_tessenav_build_navigator_submenu_screens( $inner_blocks, $id_map ) {
+		$chevron_right = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" focusable="false"><path d="M4 1.5L8.5 6L4 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+		$chevron_left  = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+		$html          = '';
+
+		foreach ( $inner_blocks as $block ) {
+			if ( 'sagiriswd/tessenav-submenu' !== $block->name ) {
+				continue;
+			}
+
+			$screen_id   = $id_map[ spl_object_id( $block ) ] ?? '';
+			$label       = isset( $block->attributes['label'] ) ? wp_kses_post( $block->attributes['label'] ) : '';
+			$back_button = sprintf(
+				'<button class="sagiriswd-tn__navigator-back" data-wp-on--click="actions.navigateBack">%s%s</button>',
+				$chevron_left,
+				$label
+			);
+
+			// Nested submenus first, then other inner block content.
+			$drill_downs  = '';
+			$other_blocks = '';
+			foreach ( $block->inner_blocks as $child ) {
+				if ( 'sagiriswd/tessenav-submenu' === $child->name ) {
+					$child_screen = $id_map[ spl_object_id( $child ) ] ?? '';
+					$child_label  = isset( $child->attributes['label'] ) ? wp_kses_post( $child->attributes['label'] ) : '';
+					$drill_downs .= sprintf(
+						'<button class="sagiriswd-tn__navigator-drill-down" data-wp-on--click="actions.navigateTo" data-wp-context=\'{"screenId":"%s"}\'>%s%s</button>',
+						esc_attr( $child_screen ),
+						$child_label,
+						$chevron_right
+					);
+				} else {
+					$other_blocks .= $child->render();
+				}
+			}
+
+			$html .= sprintf(
+				'<div class="sagiriswd-tn__navigator-screen" data-wp-context=\'{"screenId":"%s"}\' data-wp-class--is-active="state.isCurrentScreen">%s%s%s</div>',
+				esc_attr( $screen_id ),
+				$back_button,
+				$drill_downs,
+				$other_blocks
+			);
+
+			$html .= sagiriswd_tessenav_build_navigator_submenu_screens( $block->inner_blocks, $id_map );
+		}
+
+		return $html;
+	}
+}
+
+if ( ! function_exists( 'sagiriswd_tessenav_build_navigator_html' ) ) {
+	/**
+	 * Builds the full Navigator HTML: root screen + all submenu screens.
+	 *
+	 * Accepts $premium_status directly to allow unit testing without relying on
+	 * sagiriswd_tessenav_premium_status().
+	 *
+	 * @param iterable $top_level_inner_blocks Direct inner blocks of the TesseNav block.
+	 * @param array    $id_map                 Map from spl_object_id to screen-N string.
+	 * @param array    $premium_status         { isPremium: bool, inGracePeriod: bool, graceDaysRemaining: int }
+	 * @return string HTML string.
+	 */
+	function sagiriswd_tessenav_build_navigator_html( $top_level_inner_blocks, $id_map, $premium_status ) {
+		$can_render_all        = $premium_status['isPremium'] || $premium_status['inGracePeriod'];
+		$chevron_right         = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" focusable="false"><path d="M4 1.5L8.5 6L4 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+		$top_level_count       = 0;
+		$root_content          = '';
+		$allowed_submenu_roots = array();
+
+		foreach ( $top_level_inner_blocks as $block ) {
+			if ( 'sagiriswd/tessenav-submenu' === $block->name ) {
+				$top_level_count++;
+				if ( ! $can_render_all && $top_level_count > 3 ) {
+					continue;
+				}
+				$screen_id              = $id_map[ spl_object_id( $block ) ] ?? '';
+				$label                  = isset( $block->attributes['label'] ) ? wp_kses_post( $block->attributes['label'] ) : '';
+				$allowed_submenu_roots[] = $block;
+				$root_content          .= sprintf(
+					'<button class="sagiriswd-tn__navigator-drill-down" data-wp-on--click="actions.navigateTo" data-wp-context=\'{"screenId":"%s"}\'>%s%s</button>',
+					esc_attr( $screen_id ),
+					$label,
+					$chevron_right
+				);
+			} else {
+				$root_content .= $block->render();
+			}
+		}
+
+		$root_screen     = sprintf(
+			'<div class="sagiriswd-tn__navigator-screen sagiriswd-tn__navigator-screen--root" data-wp-context=\'{"screenId":"root"}\' data-wp-class--is-active="state.isCurrentScreen">%s</div>',
+			$root_content
+		);
+		// Only build screens for allowed top-level submenus (free-tier limit respected).
+		$submenu_screens = sagiriswd_tessenav_build_navigator_submenu_screens( $allowed_submenu_roots, $id_map );
+
+		return sprintf(
+			'<div class="sagiriswd-tn__navigator" data-wp-class--is-navigating-forward="state.isNavigatingForward" data-wp-class--is-navigating-back="state.isNavigatingBack">%s%s</div>',
+			$root_screen,
+			$submenu_screens
+		);
+	}
+}

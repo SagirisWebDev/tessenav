@@ -35,3 +35,9 @@ node_modules/
 # PHP dependencies
 vendor/
 composer.lock
+
+# QA / test artefacts
+.playwright-mcp/
+test-results/
+nav-*.png
+.phpunit.result.cache

@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'TESSENAV_GRACE_PERIOD_DAYS', 30 );
-define( 'TESSENAV_UPGRADE_URL', 'https://example.com/upgrade' ); // placeholder
+define( 'TESSENAV_UPGRADE_URL', 'https://example.com/upgrade' ); // Placeholder.
 
 /**
  * Returns the current premium status for TesseNav.
@@ -67,6 +67,46 @@ function sagiriswd_tessenav_premium_status() {
 	);
 }
 
+/**
+ * Renders a persistent admin notice during the grace period after premium deactivation.
+ */
+function sagiriswd_tessenav_grace_period_admin_notice() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	$status = sagiriswd_tessenav_premium_status();
+
+	if ( ! $status['inGracePeriod'] ) {
+		return;
+	}
+
+	$days     = $status['graceDaysRemaining'];
+	$days_str = sprintf(
+		/* translators: %d: number of days remaining */
+		_n( '%d day', '%d days', $days, 'tessenav' ),
+		$days
+	);
+	$upgrade_url = esc_url( TESSENAV_UPGRADE_URL );
+
+	printf(
+		'<div class="notice notice-error"><p>%s</p></div>',
+		wp_kses(
+			sprintf(
+				/* translators: 1: days remaining string, 2: upgrade URL */
+				__( 'TesseNav: your premium grace period expires in %1$s. <a href="%2$s">Upgrade now</a> to keep all features.', 'tessenav' ),
+				$days_str,
+				$upgrade_url
+			),
+			array( 'a' => array( 'href' => array() ) )
+		)
+	);
+}
+add_action( 'admin_notices', 'sagiriswd_tessenav_grace_period_admin_notice' );
+
+/**
+ * Passes premium status and upgrade URL to the block editor.
+ */
 function sagiriswd_tessenav_enqueue_editor_settings() {
 	$status = sagiriswd_tessenav_premium_status();
 	wp_localize_script(

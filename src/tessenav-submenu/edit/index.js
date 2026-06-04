@@ -32,6 +32,7 @@ import { useMergeRefs, usePrevious } from '@wordpress/compose';
  */
 import { ItemSubmenuIcon } from '../icons';
 import { LinkUI } from './link-ui';
+import { UpsellModal } from '../upsell-modal';
 import { updateAttributes } from '../../update-attributes';
 import { Controls } from '../../controls';
 import { getColors, getSubmenuChildBlockProps } from '../../utils';
@@ -127,7 +128,7 @@ export default function Edit( {
 
 	const { showSubmenuIcon, maxNestingLevel, openSubmenusOnClick } = context;
 
-	const { selectBlock } = useDispatch( blockEditorStore );
+	const { selectBlock, removeBlocks } = useDispatch( blockEditorStore );
 	const [ isSubmenuOpen, setIsSubmenuOpen ] = useState( false );
 	const [ isLinkUIOpen, setIsLinkUIOpen ] = useState( false );
 
@@ -159,6 +160,7 @@ export default function Edit( {
 		onlyDescendantIsEmptyLink,
 		isParentSelected,
 		isInSecondHalf,
+		topLevelSubmenuSiblingCount,
 	} = useSelect(
 		( select ) => {
 			const {
@@ -195,6 +197,8 @@ export default function Edit( {
 				'sagiriswd/tessenav'
 			);
 
+			// Count sibling top-level submenus (excluding this block) for the free-tier gate.
+			let _topLevelSubmenuSiblingCount = 0;
 			if ( parentBlock.length >= 1 ) {
 				const desktop = window.innerWidth >= 600;
 				const pid = parentBlock[ 0 ];
@@ -204,6 +208,13 @@ export default function Edit( {
 					desktop && childCount > 2 && childCount / index < 1.5
 						? true
 						: false;
+
+				_topLevelSubmenuSiblingCount = getBlockOrder( pid ).filter(
+					( id ) => {
+						if ( id === clientId ) return false;
+						return getBlock( id )?.name === 'sagiriswd/tessenav-submenu';
+					}
+				).length;
 			}
 
 			return {
@@ -224,6 +235,7 @@ export default function Edit( {
 				onlyDescendantIsEmptyLink: _onlyDescendantIsEmptyLink,
 				isParentSelected: selectedBlockId === clientId,
 				isInSecondHalf,
+				topLevelSubmenuSiblingCount: _topLevelSubmenuSiblingCount,
 			};
 		},
 		[ clientId ]
@@ -433,6 +445,25 @@ export default function Edit( {
 	} );
 
 	const ParentElement = openSubmenusOnClick ? 'button' : 'a';
+
+	// Free-tier insertion gate: intercept new insertions (no label) that would
+	// exceed the 3 top-level submenu limit. Existing blocks with labels are
+	// never removed — only fresh insertions are gated.
+	const isTopLevelSubmenu = parentCount === 0;
+	const showUpsellModal =
+		isTopLevelSubmenu &&
+		topLevelSubmenuSiblingCount >= 3 &&
+		! window.tessenavSettings?.isPremium &&
+		! label;
+
+	if ( showUpsellModal ) {
+		return (
+			<UpsellModal
+				upgradeUrl={ window.tessenavSettings?.upgradeUrl ?? '' }
+				onClose={ () => removeBlocks( [ clientId ] ) }
+			/>
+		);
+	}
 
 	return (
 		<>

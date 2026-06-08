@@ -36,3 +36,12 @@
   border-radius: 4px;
   background: rgba(127,127,127,.08);
 }
+
+/* On mobile editor canvas, offset the fixed overlay downward so the WP block
+   toolbar isn't covering it. */
+@media (max-width: 599px) {
+  .sagiriswd-tn__responsive-container.is-menu-open,
+  .sagiriswd-tn__responsive-container.has-modal-open {
+    top: 60px;
+  }
+}

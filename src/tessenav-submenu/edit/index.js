@@ -22,7 +22,7 @@ import {
 	getColorClassName,
 } from '@wordpress/block-editor';
 import { isURL, prependHTTP } from '@wordpress/url';
-import { useState, useEffect, useRef } from '@wordpress/element';
+import { useState, useEffect, useRef, useContext } from '@wordpress/element';
 import { link as linkIcon } from '@wordpress/icons';
 import { speak } from '@wordpress/a11y';
 import { useMergeRefs, usePrevious } from '@wordpress/compose';
@@ -37,6 +37,7 @@ import { updateAttributes } from '../../update-attributes';
 import { Controls } from '../../controls';
 import { getColors, getSubmenuChildBlockProps } from '../../utils';
 import { DEFAULT_BLOCK } from '../../constants';
+import { TesseNavDrillContext } from '../../tessenav/edit/drill-context';
 
 const ALLOWED_BLOCKS = [
 	'core/group',
@@ -131,6 +132,12 @@ export default function Edit( {
 	const { selectBlock, removeBlocks } = useDispatch( blockEditorStore );
 	const [ isSubmenuOpen, setIsSubmenuOpen ] = useState( false );
 	const [ isLinkUIOpen, setIsLinkUIOpen ] = useState( false );
+
+	const drillStack = useContext( TesseNavDrillContext ) ?? [];
+	const isOnActivePath = drillStack.includes( clientId );
+	const isActiveScreen =
+		drillStack.length > 0 &&
+		drillStack[ drillStack.length - 1 ] === clientId;
 
 	// Store what element opened the popover, so we know where to return focus to (toolbar button vs navigation link text)
 	const [ openedBy, setOpenedBy ] = useState( null );
@@ -375,6 +382,8 @@ export default function Edit( {
 			'is-dragging-within': isDraggingWithin,
 			'has-link': !! url,
 			'has-child': hasChildren,
+			'is-on-active-path': isOnActivePath,
+			'is-active-screen': isActiveScreen,
 			'has-text-color':
 				!! attributes.textColor || !! textColor || !! customTextColor,
 			[ getColorClassName( 'color', attributes.textColor ) ]:
@@ -576,6 +585,12 @@ export default function Edit( {
 						<ItemSubmenuIcon />
 					</span>
 				) }
+				<span
+					className="sagiriswd-tn__editor-drill-chevron"
+					aria-hidden="true"
+				>
+					{ '›' }
+				</span>
 				<div { ...innerBlocksProps } />
 			</div>
 		</>

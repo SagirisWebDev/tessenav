@@ -18,7 +18,7 @@ import {
 	useBlockEditingMode,
 } from '@wordpress/block-editor';
 
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch, select } from '@wordpress/data';
 import {
 	__experimentalToolsPanel as ToolsPanel,
 	__experimentalToolsPanelItem as ToolsPanelItem,
@@ -31,7 +31,7 @@ import {
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
-import { close, Icon } from '@wordpress/icons';
+import { close, chevronLeft, Icon } from '@wordpress/icons';
 import { useInstanceId } from '@wordpress/compose';
 
 /**
@@ -44,6 +44,8 @@ import { useInnerBlocks } from './use-inner-blocks';
 import { ColorTools } from '../../utils';
 import AccessibleMenuDescription from './accessible-menu-description';
 import { useToolsPanelDropdownMenuProps } from '../../hooks';
+import { deriveDrillStack } from './derive-drill-stack';
+import { TesseNavDrillContext } from './drill-context';
 
 function Edit( {
 	attributes,
@@ -90,6 +92,57 @@ function Edit( {
 		useState( false );
 
 	const [ overlayMenuPreview, setOverlayMenuPreview ] = useState( false );
+
+	// ── Editor drill-down state ──────────────────────────────────────────────
+	// See docs/adr/0004-drill-state-from-block-selection.md
+	const selectedClientId = useSelect(
+		( s ) => s( blockEditorStore ).getSelectedBlockClientId(),
+		[]
+	);
+
+	const [ drillStack, setDrillStack ] = useState( [] );
+
+	useEffect( () => {
+		const { getBlockParents, getBlockName } = select( blockEditorStore );
+		const derived = deriveDrillStack( {
+			selectedClientId,
+			tessenavClientId: clientId,
+			getBlockParents,
+			getBlockName,
+		} );
+		if ( derived === null ) {
+			return;
+		}
+		setDrillStack( ( prev ) =>
+			prev.length === derived.length &&
+			prev.every( ( id, i ) => id === derived[ i ] )
+				? prev
+				: derived
+		);
+	}, [ selectedClientId, clientId ] );
+
+	const activeSubmenuId = drillStack[ drillStack.length - 1 ] ?? null;
+
+	const activeSubmenuLabel = useSelect(
+		( s ) => {
+			if ( ! activeSubmenuId ) {
+				return '';
+			}
+			const block = s( blockEditorStore ).getBlock( activeSubmenuId );
+			return block?.attributes?.label ?? '';
+		},
+		[ activeSubmenuId ]
+	);
+
+	const { selectBlock } = useDispatch( blockEditorStore );
+
+	const onDrillBack = () => {
+		const parentId =
+			drillStack.length > 1
+				? drillStack[ drillStack.length - 2 ]
+				: clientId;
+		selectBlock( parentId );
+	};
 
 	const navRef = useRef();
 
@@ -404,7 +457,24 @@ function Edit( {
 					overlayBackgroundColor={ overlayBackgroundColor }
 					overlayTextColor={ overlayTextColor }
 				>
-					<div { ...innerBlocksProps } />
+					<TesseNavDrillContext.Provider value={ drillStack }>
+						{ isResponsiveMenuOpen && drillStack.length > 0 && (
+							<div className="sagiriswd-tn__editor-drill-chrome">
+								<Button
+									__next40pxDefaultSize
+									className="sagiriswd-tn__editor-drill-back"
+									icon={ chevronLeft }
+									onClick={ onDrillBack }
+								>
+									{ __( 'Back' ) }
+								</Button>
+								<span className="sagiriswd-tn__editor-drill-title">
+									{ activeSubmenuLabel || __( 'Untitled' ) }
+								</span>
+							</div>
+						) }
+						<div { ...innerBlocksProps } />
+					</TesseNavDrillContext.Provider>
 				</ResponsiveWrapper>
 			</TagName>
 		</>

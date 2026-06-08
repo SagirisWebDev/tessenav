@@ -45,3 +45,54 @@
     top: 60px;
   }
 }
+
+/* Drill-down chrome — Back button + active screen title */
+.sagiriswd-tn__editor-drill-chrome {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .75rem;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  margin-bottom: .5rem;
+}
+
+.sagiriswd-tn__editor-drill-title {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* Decorative chevron — hidden by default, shown only inside open overlay */
+.sagiriswd-tn__editor-drill-chevron {
+  display: none;
+  margin-left: auto;
+  padding: 0 .25rem;
+  color: rgba(0,0,0,.5);
+  pointer-events: none;
+  font-size: 1.25em;
+  line-height: 1;
+}
+
+/* Drill-down visibility rules — scoped to the open overlay */
+.sagiriswd-tn__responsive-container.is-menu-open {
+  /* Show the decorative chevron on every Submenu row inside the open overlay. */
+  .sagiriswd-tn__editor-drill-chevron {
+    display: inline-flex;
+  }
+
+  /* Hide off-path Submenu siblings — when any container holds an on-path
+     Submenu, its other Submenu children are hidden. */
+  *:has(> [data-type="sagiriswd/tessenav-submenu"].is-on-active-path)
+    > [data-type="sagiriswd/tessenav-submenu"]:not(.is-on-active-path) {
+    display: none;
+  }
+
+  /* The on-path Submenu's own row label and icon are replaced by chrome — hide them. */
+  [data-type="sagiriswd/tessenav-submenu"].is-on-active-path
+    > .sagiriswd-tn-item__content,
+  [data-type="sagiriswd/tessenav-submenu"].is-on-active-path
+    > .sagiriswd-tn__submenu-icon,
+  [data-type="sagiriswd/tessenav-submenu"].is-on-active-path
+    > .sagiriswd-tn__editor-drill-chevron {
+    display: none;
+  }
+}

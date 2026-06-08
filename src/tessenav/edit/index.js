@@ -31,7 +31,7 @@ import {
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
-import { close, chevronLeft, Icon } from '@wordpress/icons';
+import { close, Icon } from '@wordpress/icons';
 import { useInstanceId } from '@wordpress/compose';
 
 /**
@@ -46,6 +46,7 @@ import AccessibleMenuDescription from './accessible-menu-description';
 import { useToolsPanelDropdownMenuProps } from '../../hooks';
 import { deriveDrillStack } from './derive-drill-stack';
 import { TesseNavDrillContext } from './drill-context';
+import DrillChrome from './drill-chrome';
 
 function Edit( {
 	attributes,
@@ -135,14 +136,6 @@ function Edit( {
 	);
 
 	const { selectBlock } = useDispatch( blockEditorStore );
-
-	const onDrillBack = () => {
-		const parentId =
-			drillStack.length > 1
-				? drillStack[ drillStack.length - 2 ]
-				: clientId;
-		selectBlock( parentId );
-	};
 
 	const navRef = useRef();
 
@@ -458,20 +451,13 @@ function Edit( {
 					overlayTextColor={ overlayTextColor }
 				>
 					<TesseNavDrillContext.Provider value={ drillStack }>
-						{ isResponsiveMenuOpen && drillStack.length > 0 && (
-							<div className="sagiriswd-tn__editor-drill-chrome">
-								<Button
-									__next40pxDefaultSize
-									className="sagiriswd-tn__editor-drill-back"
-									icon={ chevronLeft }
-									onClick={ onDrillBack }
-								>
-									{ __( 'Back' ) }
-								</Button>
-								<span className="sagiriswd-tn__editor-drill-title">
-									{ activeSubmenuLabel || __( 'Untitled' ) }
-								</span>
-							</div>
+						{ isResponsiveMenuOpen && (
+							<DrillChrome
+								drillStack={ drillStack }
+								tessenavClientId={ clientId }
+								activeSubmenuLabel={ activeSubmenuLabel }
+								selectBlock={ selectBlock }
+							/>
 						) }
 						<div { ...innerBlocksProps } />
 					</TesseNavDrillContext.Provider>

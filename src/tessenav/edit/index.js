@@ -202,6 +202,12 @@ function Edit( {
 			],
 			templateLock: false,
 			renderAppender: InnerBlocks.ButtonBlockAppender,
+			// Capture descendant block toolbars at the TesseNav level so they
+			// position above the TesseNav wrapper instead of floating above the
+			// selected child. In drill mode this keeps the toolbar from
+			// covering the drill chrome (Back + title); in the inline view it
+			// matches the TesseNav toolbar's own position.
+			__experimentalCaptureToolbars: true,
 		}
 	);
 

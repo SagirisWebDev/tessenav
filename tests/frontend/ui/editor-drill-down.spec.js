@@ -489,3 +489,219 @@ test.describe( 'T6 AC-CHEVRON-VISIBILITY — decorative chevron present in drill
 		// If count is 0, there is no chevron in the desktop view — AC satisfied.
 	} );
 } );
+
+// ─── T7: AC-FLATTEN-DRILL-CONTAINER ──────────────────────────────────────────
+
+test.describe( 'T7 AC-FLATTEN-DRILL-CONTAINER — active-screen container is position:static at drill depth 1', () => {
+	test.beforeEach( async ( { page } ) => {
+		await loginToAdmin( page );
+	} );
+
+	test( 'T7 — active-screen .sagiriswd-tn__submenu-container has computed position:static', async ( {
+		page,
+	} ) => {
+		const canvas  = await openMobileEditor( page );
+		const overlay = await openOverlayInEditor( canvas );
+
+		// Require at least 2 top-level Submenus (same fixture requirement as T1).
+		const topLevelSubmenus = overlay.locator(
+			'[data-type="sagiriswd/tessenav-submenu"]'
+		);
+		const submenuCount = await topLevelSubmenus.count();
+		if ( submenuCount < 2 ) {
+			test.skip(
+				true,
+				'Fixture gap: post 484 needs at least 2 top-level Submenus inside ' +
+					'the TesseNav block to assert sibling hiding (T1). ' +
+					'Add a second sagiriswd/tessenav-submenu as a direct child of the TesseNav block.'
+			);
+			return;
+		}
+
+		// Drill into the first top-level Submenu.
+		const firstSubmenu = topLevelSubmenus.first();
+		await firstSubmenu.click();
+		await page.waitForTimeout( 400 );
+
+		// Wait for the active-screen class to appear (proven to work in T1).
+		await expect( firstSubmenu ).toHaveClass( /is-active-screen/, {
+			timeout: EDITOR_TIMEOUT,
+		} );
+
+		// Locate the active screen's direct-child submenu container.
+		const activeContainer = canvas.locator(
+			'[data-type="sagiriswd/tessenav-submenu"].is-active-screen > .sagiriswd-tn__submenu-container'
+		).first();
+
+		// The container must exist — if not the implementer hasn't shipped the class yet.
+		await activeContainer.waitFor( { state: 'attached', timeout: EDITOR_TIMEOUT } );
+
+		// Read the computed position. Pre-implementation this will be 'absolute'.
+		const position = await activeContainer.evaluate(
+			( el ) => window.getComputedStyle( el ).position
+		);
+		expect( position ).toBe( 'static' );
+	} );
+} );
+
+// ─── T8: AC-INTERMEDIATE-CONTENT-HIDDEN ──────────────────────────────────────
+
+test.describe( 'T8 AC-INTERMEDIATE-CONTENT-HIDDEN — parent-screen non-Submenu content does not stack into the active screen at drill depth 2', () => {
+	test.beforeEach( async ( { page } ) => {
+		await loginToAdmin( page );
+	} );
+
+	test( 'T8 — at depth 2, non-Submenu siblings of the on-path child inside an intermediate on-path container are display:none', async ( {
+		page,
+	} ) => {
+		const canvas = await openMobileEditor( page );
+		await openOverlayInEditor( canvas );
+
+		// Drive drill state directly via wp.data to avoid fixture-DOM coupling:
+		// pick a TesseNav block whose first Submenu has at least one Submenu child
+		// AND at least one non-Submenu child (the case that exhibits the stacking bug).
+		const setup = await page.evaluate( () => {
+			const iframe = document.querySelector( 'iframe[name="editor-canvas"]' );
+			const doc = iframe ? iframe.contentDocument : document;
+			const tn = doc.querySelector( '[data-type="sagiriswd/tessenav"]' );
+			if ( ! tn ) return { ok: false, reason: 'no-tessenav' };
+			const tnId = tn.getAttribute( 'data-block' );
+			const tnBlock = window.wp.data.select( 'core/block-editor' ).getBlock( tnId );
+			const outer = tnBlock.innerBlocks.find( ( b ) => b.name === 'sagiriswd/tessenav-submenu' );
+			if ( ! outer ) return { ok: false, reason: 'no-outer-submenu' };
+			const inner = outer.innerBlocks.find( ( b ) => b.name === 'sagiriswd/tessenav-submenu' );
+			const nonSubmenuSibling = outer.innerBlocks.find( ( b ) => b.name !== 'sagiriswd/tessenav-submenu' );
+			if ( ! inner || ! nonSubmenuSibling ) return { ok: false, reason: 'fixture-gap' };
+			window.wp.data.dispatch( 'core/block-editor' ).selectBlock( inner.clientId );
+			return {
+				ok: true,
+				outerId: outer.clientId,
+				innerId: inner.clientId,
+				nonSubmenuSiblingId: nonSubmenuSibling.clientId,
+			};
+		} );
+
+		if ( ! setup.ok ) {
+			test.skip(
+				true,
+				`Fixture gap: T8 needs a TesseNav with a top-level Submenu containing both a nested Submenu and a non-Submenu block (e.g. core/group). Reason: ${ setup.reason }.`
+			);
+			return;
+		}
+
+		await page.waitForTimeout( 600 );
+
+		// Assert the non-Submenu sibling of the on-path inner Submenu, inside the
+		// intermediate (Products) container, is display:none.
+		const result = await page.evaluate( ( id ) => {
+			const iframe = document.querySelector( 'iframe[name="editor-canvas"]' );
+			const doc = iframe ? iframe.contentDocument : document;
+			const el = doc.querySelector( `[data-block="${ id }"]` );
+			if ( ! el ) return { found: false };
+			const cs = doc.defaultView.getComputedStyle( el );
+			return { found: true, display: cs.display };
+		}, setup.nonSubmenuSiblingId );
+
+		expect( result.found ).toBe( true );
+		expect( result.display ).toBe( 'none' );
+	} );
+} );
+
+// ─── T9: AC-CHROME-CLICK-ISOLATION — clicks inside the chrome don't reset drill ─
+
+test.describe( 'T9 AC-CHROME-CLICK-ISOLATION — title and back clicks do not bubble into WP block selection', () => {
+	test.beforeEach( async ( { page } ) => {
+		await loginToAdmin( page );
+	} );
+
+	test( 'T9a — clicking the chrome title at depth ≥ 2 leaves drill stack unchanged', async ( {
+		page,
+	} ) => {
+		const canvas = await openMobileEditor( page );
+		await openOverlayInEditor( canvas );
+
+		const setup = await page.evaluate( () => {
+			const iframe = document.querySelector( 'iframe[name="editor-canvas"]' );
+			const doc = iframe ? iframe.contentDocument : document;
+			const tn = doc.querySelector( '[data-type="sagiriswd/tessenav"]' );
+			if ( ! tn ) return { ok: false, reason: 'no-tessenav' };
+			const tnBlock = window.wp.data.select( 'core/block-editor' ).getBlock( tn.getAttribute( 'data-block' ) );
+			const outer = tnBlock.innerBlocks.find( ( b ) => b.name === 'sagiriswd/tessenav-submenu' );
+			const inner = outer?.innerBlocks?.find( ( b ) => b.name === 'sagiriswd/tessenav-submenu' );
+			if ( ! inner ) return { ok: false, reason: 'fixture-gap' };
+			window.wp.data.dispatch( 'core/block-editor' ).selectBlock( inner.clientId );
+			return { ok: true, innerCid: inner.clientId, innerLabel: inner.attributes?.label ?? '' };
+		} );
+
+		if ( ! setup.ok ) {
+			test.skip( true, `Fixture gap: T9a needs a top-level Submenu with a nested Submenu. Reason: ${ setup.reason }.` );
+			return;
+		}
+
+		await page.waitForTimeout( 700 );
+
+		// Confirm depth 2 (the inner Submenu is the active screen).
+		const preTitle = await canvas.locator( '.sagiriswd-tn__editor-drill-title' ).first().innerText();
+		expect( preTitle.trim() ).not.toBe( '' );
+
+		// Click the chrome title.
+		await canvas.locator( '.sagiriswd-tn__editor-drill-title' ).first().click();
+		await page.waitForTimeout( 500 );
+
+		// The same Submenu should still be the active screen — title unchanged,
+		// chrome still rendered. If the click had reset the stack we'd see no chrome.
+		const postChromeCount = await canvas.locator( '.sagiriswd-tn__editor-drill-chrome' ).count();
+		expect( postChromeCount ).toBeGreaterThan( 0 );
+		const postTitle = await canvas.locator( '.sagiriswd-tn__editor-drill-title' ).first().innerText();
+		expect( postTitle.trim() ).toBe( preTitle.trim() );
+	} );
+
+	test( 'T9b — Back at depth ≥ 2 reliably goes to parent, not to root', async ( {
+		page,
+	} ) => {
+		const canvas = await openMobileEditor( page );
+		await openOverlayInEditor( canvas );
+
+		const setup = await page.evaluate( () => {
+			const iframe = document.querySelector( 'iframe[name="editor-canvas"]' );
+			const doc = iframe ? iframe.contentDocument : document;
+			const tn = doc.querySelector( '[data-type="sagiriswd/tessenav"]' );
+			if ( ! tn ) return { ok: false, reason: 'no-tessenav' };
+			const tnBlock = window.wp.data.select( 'core/block-editor' ).getBlock( tn.getAttribute( 'data-block' ) );
+			const outer = tnBlock.innerBlocks.find( ( b ) => b.name === 'sagiriswd/tessenav-submenu' );
+			const inner = outer?.innerBlocks?.find( ( b ) => b.name === 'sagiriswd/tessenav-submenu' );
+			if ( ! inner ) return { ok: false, reason: 'fixture-gap' };
+			window.wp.data.dispatch( 'core/block-editor' ).selectBlock( inner.clientId );
+			return {
+				ok: true,
+				outerLabel: outer.attributes?.label ?? '',
+				innerLabel: inner.attributes?.label ?? '',
+			};
+		} );
+
+		if ( ! setup.ok ) {
+			test.skip( true, `Fixture gap: T9b needs a top-level Submenu with a nested Submenu. Reason: ${ setup.reason }.` );
+			return;
+		}
+
+		await page.waitForTimeout( 700 );
+
+		// Pre-click: chrome shows the inner Submenu's label.
+		const preTitle = await canvas.locator( '.sagiriswd-tn__editor-drill-title' ).first().innerText();
+		expect( preTitle.trim() ).toBe( setup.innerLabel || 'Untitled' );
+
+		// Click Back.
+		await canvas.locator( '.sagiriswd-tn__editor-drill-back' ).first().click();
+		await page.waitForTimeout( 500 );
+
+		// Post-click: chrome must still exist (we're at depth 1, not root) and
+		// the title must now match the OUTER Submenu's label.
+		const postChromeCount = await canvas.locator( '.sagiriswd-tn__editor-drill-chrome' ).count();
+		expect(
+			postChromeCount,
+			'Expected chrome to still be visible at depth 1 after Back from depth 2; if Back leaked through WP block-list selection, drill stack would be [] and chrome would unmount.'
+		).toBeGreaterThan( 0 );
+		const postTitle = await canvas.locator( '.sagiriswd-tn__editor-drill-title' ).first().innerText();
+		expect( postTitle.trim() ).toBe( setup.outerLabel || 'Untitled' );
+	} );
+} );

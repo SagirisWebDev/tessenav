@@ -95,4 +95,44 @@
     > .sagiriswd-tn__editor-drill-chevron {
     display: none;
   }
+
+  /* Flatten on-path containers so the active screen flows as inline page content
+     beneath the chrome instead of a floating popup. Strips dropdown decoration
+     (border, background, inline width) so each nesting level reads as one plane. */
+  [data-type="sagiriswd/tessenav-submenu"].is-on-active-path
+    > .sagiriswd-tn__submenu-container {
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    visibility: visible;
+    opacity: 1;
+    overflow: visible;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  /* Override the nested-wrapper max-content rule from src/tessenav/style.scss:1292
+     for on-path wrappers so the active screen fills the overlay width regardless
+     of nesting depth. */
+  .sagiriswd-tn__submenu-container
+    > .wp-block-sagiriswd-tessenav-submenu.is-on-active-path {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Inside an intermediate (non-active-screen) on-path Submenu's container, hide
+     non-Submenu siblings of the on-path child — they belong to the parent
+     screen and would otherwise stack behind the active screen's content. The
+     active-screen's own container is untouched, so its full content (including
+     non-Submenu blocks like groups, paragraphs, images) stays visible. */
+  [data-type="sagiriswd/tessenav-submenu"].is-on-active-path:not(.is-active-screen)
+    > .sagiriswd-tn__submenu-container
+    > *:not([data-type="sagiriswd/tessenav-submenu"]) {
+    display: none;
+  }
 }

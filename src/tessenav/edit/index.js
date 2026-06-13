@@ -47,6 +47,7 @@ import { useToolsPanelDropdownMenuProps } from '../../hooks';
 import { deriveDrillStack } from './derive-drill-stack';
 import { TesseNavDrillContext } from './drill-context';
 import DrillChrome from './drill-chrome';
+import { useNestedPositioner } from './use-nested-positioner';
 
 function Edit( {
 	attributes,
@@ -138,6 +139,8 @@ function Edit( {
 	const { selectBlock } = useDispatch( blockEditorStore );
 
 	const navRef = useRef();
+
+	useNestedPositioner( navRef );
 
 	// The standard HTML5 tag for the block wrapper.
 	const TagName = 'nav';

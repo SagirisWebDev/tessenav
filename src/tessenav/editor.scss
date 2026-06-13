@@ -136,3 +136,46 @@
     display: none;
   }
 }
+
+/* ─── Inline desktop preview: nested submenu positioning (issue #12) ──────────
+ *
+ * The shared style (style.scss:1292) sets `width: max-content` on every nested
+ * wrapper so visible widths hug the label. That works on the frontend where
+ * view.js writes pixel-based positions, but in the editor canvas the static
+ * rule `left: 100% !important; top: -1px !important` (style.scss:315) anchors
+ * the nested flyout against the now-narrow wrapper — placing the flyout INSIDE
+ * the parent dropdown.
+ *
+ * The fix is editor-only: restore wrapper stretch-width so `left: 100%`
+ * resolves at the parent container's right edge, and let
+ * `use-nested-positioner.js` flip via `data-tn-side="left"` when right-side
+ * placement overflows the inline TesseNav block or the viewport.
+ */
+.sagiriswd-tn__submenu-container > .wp-block-sagiriswd-tessenav-submenu {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Position: nested container fully OFF the parent container's border in the
+ * editor preview. style.scss:316 uses `left: 100% !important; top: -1px` for a
+ * border-merge convention (borders share 1px) that's fine on the frontend but
+ * reads as "anchored on top of" the parent dropdown in the editor. Push +1px
+ * horizontally so the parent's right border and the nested's left border
+ * occupy distinct columns.
+ *
+ * Both the existing rule and the override carry `!important`, so the override
+ * needs higher SPECIFICITY than `style.scss:315`'s 0-3-0. The `.sagiriswd-tn`
+ * scope plus the doubled `.submenu-container` yields 0-4-0; the `[data-tn-side]`
+ * variant adds an attribute selector. */
+.sagiriswd-tn
+  .sagiriswd-tn__submenu-container
+  .sagiriswd-tn__submenu-container.sagiriswd-tn__submenu-container {
+  left: calc(100% + 1px) !important;
+}
+
+.sagiriswd-tn
+  .sagiriswd-tn__submenu-container.sagiriswd-tn__submenu-container[data-tn-side="left"] {
+  left: auto !important;
+  right: calc(100% + 1px) !important;
+  top: -1px !important;
+}

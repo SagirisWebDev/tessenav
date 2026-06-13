@@ -37,6 +37,7 @@ import { useInstanceId } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
+import { PRIORITIZED_INSERTER_BLOCKS } from '../../constants';
 import ResponsiveWrapper from './responsive-wrapper';
 import OverlayMenuIcon from './overlay-menu-icon';
 import OverlayMenuPreview from './overlay-menu-preview';
@@ -203,6 +204,9 @@ function Edit( {
 				'core/columns',
 				'core/grid',
 			],
+			// Surface Submenu and Group first in the inserter's quick-add list —
+			// these are the two blocks authors reach for most often inside a nav.
+			prioritizedInserterBlocks: PRIORITIZED_INSERTER_BLOCKS,
 			templateLock: false,
 			renderAppender: InnerBlocks.ButtonBlockAppender,
 			// Capture descendant block toolbars at the TesseNav level so they

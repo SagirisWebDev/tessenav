@@ -3,7 +3,7 @@ export const DEFAULT_BLOCK = {
 };
 
 export const PRIORITIZED_INSERTER_BLOCKS = [
-	'sagiriswd/tessenav-link',
+	'sagiriswd/tessenav-submenu',
 	'core/group',
 ];
 

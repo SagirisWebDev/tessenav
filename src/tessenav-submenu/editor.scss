@@ -14,7 +14,6 @@
 			// We use important here because if the parent block is selected and submenus are present, they should always be visible.
 			visibility: visible;
 			opacity: 1;
-			min-width: 200px;
 			max-width: 1920px;
 			height: auto;
 			width: max-content;
@@ -23,6 +22,12 @@
 			left: -1px; // Border width.
 			top: 100%;
 			overflow: visible;
+
+			// `min-width: 200px` is desktop-only — on mobile the overlay/navigator
+			// drives layout, so the editor preview shouldn't enforce a 200px floor.
+			@include m.break-small {
+				min-width: 200px;
+			}
 		}
 
 		@include m.break-medium {

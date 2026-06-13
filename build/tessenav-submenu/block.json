@@ -110,7 +110,8 @@
     },
     "layout": {
       "default": {
-        "type": "flex"
+        "type": "flex",
+        "orientation": "vertical"
       },
       "allowSizingOnChildren": true
     },

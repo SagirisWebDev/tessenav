@@ -236,6 +236,7 @@ export function getSubmenuChildBlockProps( innerProps ) {
 			backgroundColor: innerProps.customBackgroundColor,
 			left: innerProps.left,
 			right: innerProps.right,
+			width: innerProps.width,
 		},
 	};
 }

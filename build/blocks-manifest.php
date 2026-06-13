@@ -378,7 +378,8 @@ return array(
 			),
 			'layout' => array(
 				'default' => array(
-					'type' => 'flex'
+					'type' => 'flex',
+					'orientation' => 'vertical'
 				),
 				'allowSizingOnChildren' => true
 			),

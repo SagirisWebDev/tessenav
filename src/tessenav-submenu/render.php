@@ -243,21 +243,26 @@ if ( ! function_exists( 'sagiriswd_tessenav_submenu_render_submenu_icon') ) {
 			$css_classes .= ' ' . $colors_supports['class'];
 		}
 
-
-
 		$style_attribute = '';
 
 		if ( array_key_exists( 'style', $colors_supports ) ) {
 			$style_attribute = $colors_supports['style'];
 		}
-		// echo '<pre>';
-		// var_dump($attributes);
-		// echo '</pre>';
-		// wp_die();
+
 		if ( array_key_exists( 'isInSecondHalf', $attributes ) ) {
-			$isInSecondHalf = $attributes[ 'isInSecondHalf' ];
-			$pos = $isInSecondHalf ? 'left:revert;right:0px;' : 'right:revert;left:0px;';
+			$is_in_second_half = $attributes['isInSecondHalf'];
+			$pos = $is_in_second_half ? 'left:revert;right:0px;' : 'right:revert;left:0px;';
 			$style_attribute .= $pos;
+		}
+
+		// Only write the width if the attribute parses as a valid CSS length
+		// (digits + decimal + supported unit). Block attributes can be set via
+		// REST / hand-edited post content, so don't trust the editor's UnitControl
+		// validation alone — anything that doesn't match this pattern is dropped.
+		if ( array_key_exists( 'menuMaxWidth', $attributes )
+			&& preg_match( '/^\d+(?:\.\d+)?(px|em|rem|%|vw|vh)$/', (string) $attributes['menuMaxWidth'] )
+		) {
+			$style_attribute .= sprintf( 'width:%s;', $attributes['menuMaxWidth'] );
 		}
 		
 		$inner_blocks_html = '';
@@ -285,10 +290,6 @@ if ( ! function_exists( 'sagiriswd_tessenav_submenu_render_submenu_icon') ) {
 			$wrapper_attributes,
 			$inner_blocks_html
 		);
-		// echo '<pre>';
-		// echo $html;
-		// echo '</pre>';
-		// wp_die();
 	}
 
 	$html .= '</div>';

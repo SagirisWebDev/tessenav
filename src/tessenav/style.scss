@@ -942,7 +942,11 @@ html.has-modal-open {
   height: auto;
   max-width: 1920px;
   opacity: 1;
-  overflow: auto;
+  /* Nested submenus are absolutely positioned at the parent dropdown's right
+   * (or left) edge by view.js — `overflow: auto` would clip those flyouts at
+   * the parent's box. The mobile navigator at <600px uses a different DOM
+   * path so the overlay's own scroll context still handles tall content. */
+  overflow: visible;
   visibility: visible;
 }
 

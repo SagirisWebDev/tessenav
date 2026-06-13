@@ -44,6 +44,53 @@
   .sagiriswd-tn__responsive-container.has-modal-open {
     top: 60px;
   }
+
+  /* The frontend navigator UX kicks in at this breakpoint and drives layout
+   * via stacked screens, so the desktop flyout positioning never surfaces. The
+   * editor canvas doesn't engage the navigator (it shows the inline preview),
+   * so without this rule the absolutely-positioned flyouts — each carrying the
+   * author's desktop width (menuMaxWidth, default 200px, up to 1920px) as an
+   * inline style — cascade off-screen rightward inside the 390px overlay and
+   * push scrollWidth past clientWidth, surfacing a horizontal scrollbar.
+   *
+   * Flatten every submenu container in the open overlay: static positioning,
+   * full-overlay width. `!important` is required to defeat both the inline
+   * width style written by the editor preview path (utils.js
+   * getSubmenuChildBlockProps) and view.js's pixel-based positioner output.
+   *
+   * Hidden (closed) containers retain their default `height: 0; overflow:
+   * hidden` collapse, so flattening them adds no visible height. Visible
+   * (selected / on-active-path / hovered) containers render in flow at the
+   * overlay width and wrap their content. */
+  .sagiriswd-tn__responsive-container.is-menu-open
+    .sagiriswd-tn__submenu-container {
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Drill-only pattern: at mobile, nested Submenu labels are drill-down rows,
+   * never inline expansions. Hide the submenu-container of any Submenu block
+   * that's NOT on the active drill path. This kills the hover-reveal at line
+   * 216 (which opens the container on `:hover` for the desktop inline preview)
+   * and the `.is-selected` / `.has-child-selected` rule in submenu/editor.scss
+   * (which forces visibility for selected submenus). Without this, the
+   * editor canvas in mobile mode would mix the active screen's own content
+   * with the contents of every nested Submenu the cursor passed over —
+   * defeating the one-pane-at-a-time UX users see on the frontend.
+   *
+   * Specificity: 5 classes (`.sagiriswd-tn`, `.responsive-container`,
+   * `.is-menu-open`, `:not(.is-on-active-path)`, `.submenu-container`) + 1
+   * attribute = 0-6-0, one higher than the hover rule's 0-5-0 — wins
+   * regardless of source order. */
+  .sagiriswd-tn .sagiriswd-tn__responsive-container.is-menu-open
+    [data-type="sagiriswd/tessenav-submenu"]:not(.is-on-active-path)
+    > .sagiriswd-tn__submenu-container {
+    display: none !important;
+  }
 }
 
 /* Drill-down chrome — Back button + active screen title */

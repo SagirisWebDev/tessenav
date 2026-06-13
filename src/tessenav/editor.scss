@@ -91,6 +91,17 @@
     > .sagiriswd-tn__submenu-container {
     display: none !important;
   }
+
+  /* Hide the downward submenu-icon chevron in the mobile editor overlay.
+   * The "show submenu icon" setting drives a desktop affordance — a `⌄`
+   * caret hinting that the item opens a flyout on hover/click. In the
+   * mobile overlay each Submenu row is already a drill-down (chrome's
+   * `›` chevron handles the affordance), so the downward caret reads as
+   * stray noise. Inline (≥600px) editor preview keeps it. */
+  .sagiriswd-tn__responsive-container.is-menu-open
+    .sagiriswd-tn__submenu-icon {
+    display: none;
+  }
 }
 
 /* Drill-down chrome — Back button + active screen title */

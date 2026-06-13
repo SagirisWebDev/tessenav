@@ -22,6 +22,213 @@ const focusableSelectors = [
 // capture the clicks, instead of relying on the focusout event.
 document.addEventListener( 'click', () => {} );
 
+// ─── Desktop nested submenu positioning ──────────────────────────────────────
+//
+// A nested submenu (level 2+) must render inside the horizontal bounds of the
+// root `.sagiriswd-tn` block. The level-2 submenu picks `right` (default) or
+// `left` of its parent based on whichever side keeps it inside the root. Each
+// deeper level alternates — so a grandchild lands on the opposite side of its
+// parent, which is the side the grandparent occupies, producing a visual
+// stack-over-grandparent effect that keeps the chain within bounds.
+//
+// CSS gives us `left: 100%` (right of parent) for nested submenus at
+// `min-width: 782px`. To flip, we write inline `left/right` with `!important`
+// so the inline declaration beats the stylesheet rule.
+
+const TN_DESKTOP_MQ = '(min-width: 782px)';
+// The TesseNav block wrapper renders as <nav class="sagiriswd-tn …">. An inner
+// <div class="sagiriswd-tn__container sagiriswd-tn …"> ALSO carries the bare
+// `sagiriswd-tn` class — using that selector alone would pick up the inner
+// container (which is narrower than the actual block) and lead the positioner
+// to flip nested submenus against the wrong horizontal bounds.
+const TN_ROOT_SELECTOR = 'nav.sagiriswd-tn';
+const TN_SUBMENU_CONTAINER = '.sagiriswd-tn__submenu-container';
+
+function tnGetSubmenuAncestors( container, root ) {
+	const ancestors = [];
+	let el = container.parentElement;
+	while ( el && el !== root ) {
+		if ( el.matches?.( TN_SUBMENU_CONTAINER ) ) {
+			ancestors.push( el );
+		}
+		el = el.parentElement;
+	}
+	return ancestors;
+}
+
+function tnClearSubmenuSide( container ) {
+	container.style.removeProperty( 'left' );
+	container.style.removeProperty( 'right' );
+	delete container.dataset.tnSide;
+}
+
+function tnApplySide( container, side, parentSubmenuBox, wrapperBox, width ) {
+	// Place the flyout flush with the parent submenu container's outer edge.
+	// No clamping — pulling the flyout inward to keep it inside the inline
+	// TesseNav block re-introduces the parent-overlap that the side picker just
+	// chose a side to avoid (issue #14). If neither side truly fits, the
+	// flyout overflows the viewport on the chosen side; that's the lesser
+	// evil per the spec: parent-overlap is the hard invariant, viewport bound
+	// is soft.
+	const leftPx =
+		side === 'right'
+			? parentSubmenuBox.right - wrapperBox.left
+			: parentSubmenuBox.left - width - wrapperBox.left;
+	container.style.setProperty( 'left', `${ Math.round( leftPx ) }px`, 'important' );
+	container.style.setProperty( 'right', 'auto', 'important' );
+	container.dataset.tnSide = side;
+}
+
+function tnPositionNestedSubmenu( container, root ) {
+	const ancestors = tnGetSubmenuAncestors( container, root );
+	if ( ancestors.length === 0 ) {
+		// Top-level submenu — positioned by its menu item, leave alone.
+		return;
+	}
+
+	if ( ! window.matchMedia( TN_DESKTOP_MQ ).matches ) {
+		// Mobile breakpoint uses accordion CSS; clear our inline overrides.
+		tnClearSubmenuSide( container );
+		return;
+	}
+
+	// Reset so we can measure natural width without our prior decision skewing it.
+	tnClearSubmenuSide( container );
+
+	const rootBox = root.getBoundingClientRect();
+	const wrapper = container.parentElement;
+	if ( ! wrapper?.classList?.contains( 'has-child' ) ) {
+		return;
+	}
+	const wrapperBox = wrapper.getBoundingClientRect();
+	// The parent submenu container — the dropdown holding this wrapper — is the
+	// bound we want the nested flyout to sit outside of. Using the wrapper's
+	// box instead would let a content-sized wrapper land the flyout INSIDE the
+	// parent dropdown area.
+	const parentSubmenuBox = ancestors[ 0 ].getBoundingClientRect();
+	const width = container.offsetWidth;
+
+	let side;
+	if ( ancestors.length === 1 ) {
+		// Level 2 — first nested. Decision priority (issue #14):
+		//   1. Right fits inside the inline TesseNav block → right.
+		//   2. Left fits inside the block → left.
+		//   3. Right fits inside the viewport (overflows block) → right.
+		//   4. Left fits inside the viewport (overflows block) → left.
+		//   5. Neither fits viewport → pick the side with more viewport room.
+		// Parent-overlap is never the answer — picking a side that doesn't fit
+		// either bound and overflowing the viewport is preferred over clamping
+		// inward into the parent dropdown.
+		const rightFitsBlock = parentSubmenuBox.right + width <= rootBox.right + 1;
+		const leftFitsBlock = parentSubmenuBox.left - width >= rootBox.left - 1;
+		const viewportRight = window.innerWidth;
+		const rightFitsViewport = parentSubmenuBox.right + width <= viewportRight + 1;
+		const leftFitsViewport = parentSubmenuBox.left - width >= -1;
+		if ( rightFitsBlock ) {
+			side = 'right';
+		} else if ( leftFitsBlock ) {
+			side = 'left';
+		} else if ( rightFitsViewport ) {
+			side = 'right';
+		} else if ( leftFitsViewport ) {
+			side = 'left';
+		} else {
+			const rightRoom = viewportRight - parentSubmenuBox.right;
+			const leftRoom = parentSubmenuBox.left;
+			side = rightRoom >= leftRoom ? 'right' : 'left';
+		}
+	} else {
+		// Deeper levels alternate from the immediately enclosing container.
+		const enclosingSide = ancestors[ 0 ].dataset.tnSide || 'right';
+		side = enclosingSide === 'right' ? 'left' : 'right';
+	}
+
+	tnApplySide( container, side, parentSubmenuBox, wrapperBox, width );
+}
+
+// Observe size changes on each nested submenu container so that an externally-
+// set width (inline style, dynamic content, etc.) triggers a re-evaluation.
+const TN_OBSERVED = new WeakSet();
+function tnObserveSize( container, root ) {
+	if ( TN_OBSERVED.has( container ) ) {
+		return;
+	}
+	TN_OBSERVED.add( container );
+	if ( typeof ResizeObserver === 'undefined' ) {
+		return;
+	}
+	const ro = new ResizeObserver( () => {
+		// Only reposition if the container is currently visible (height > 0)
+		// — avoids work for closed submenus whose width is 0.
+		if ( container.offsetHeight === 0 ) {
+			return;
+		}
+		tnPositionNestedSubmenu( container, root );
+	} );
+	ro.observe( container );
+}
+
+function tnInitRoot( root ) {
+	const reposition = ( triggerEl ) => {
+		const hasChild = triggerEl?.closest?.( '.has-child' );
+		if ( ! hasChild || ! root.contains( hasChild ) ) {
+			return;
+		}
+		const container = hasChild.querySelector(
+			`:scope > ${ TN_SUBMENU_CONTAINER }`
+		);
+		if ( ! container ) {
+			return;
+		}
+		// Build the chain from outermost nested container down to this one, then
+		// position each in turn so deeper levels see their parent's chosen side.
+		const chain = [ container ];
+		let curr = container.parentElement;
+		while ( curr && curr !== root ) {
+			if ( curr.matches?.( TN_SUBMENU_CONTAINER ) ) {
+				chain.unshift( curr );
+			}
+			curr = curr.parentElement;
+		}
+		// Defer to next frame so CSS :hover / aria-expanded changes apply first.
+		requestAnimationFrame( () => {
+			for ( const c of chain ) {
+				tnPositionNestedSubmenu( c, root );
+				tnObserveSize( c, root );
+			}
+		} );
+	};
+
+	const handle = ( event ) => reposition( event.target );
+	root.addEventListener( 'mouseover', handle );
+	root.addEventListener( 'focusin', handle );
+	root.addEventListener( 'click', handle );
+
+	// Recompute on viewport resize — clear all overrides so the next interaction
+	// recalculates against the new root width.
+	let resizeTimer;
+	window.addEventListener( 'resize', () => {
+		clearTimeout( resizeTimer );
+		resizeTimer = setTimeout( () => {
+			root
+				.querySelectorAll(
+					`${ TN_SUBMENU_CONTAINER } ${ TN_SUBMENU_CONTAINER }`
+				)
+				.forEach( tnClearSubmenuSide );
+		}, 100 );
+	} );
+}
+
+function tnInitAllRoots() {
+	document.querySelectorAll( TN_ROOT_SELECTOR ).forEach( tnInitRoot );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', tnInitAllRoots );
+} else {
+	tnInitAllRoots();
+}
+
 const { state, actions } = store(
 	'sagiriswd/tessenav',
 	{

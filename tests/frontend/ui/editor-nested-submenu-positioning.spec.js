@@ -476,3 +476,208 @@ test.describe( 'T3 AC-EDITOR-FLIP-LEFT — Web Apps flips to data-tn-side="left"
 		).toBeLessThanOrEqual( productsLeft + EDGE_FUZZ );
 	} );
 } );
+
+// ─── T4: AC-EDITOR-HOVER-MODE-NO-SHIFT ───────────────────────────────────────
+//
+// Regression guard for the hover-mode editor bug: when the TesseNav block is
+// configured with `open-on-click=false` (hover mode), the frontend's compiled
+// hover rule (`:not(.open-on-click):hover > .submenu-container`) fires inside
+// the editor as well — mousing over a parent wrapper sets `overflow: auto` on
+// the parent dropdown. The nested flyout positioned at `left:100%` of the
+// wrapper makes scrollWidth > clientWidth, and the editor auto-scrolls the
+// parent dropdown leftward by the overflow distance. All children then render
+// at a wrong x-position. Fix is in `src/tessenav/editor.scss` — a tripled
+// `.sagiriswd-tn__submenu-container.sagiriswd-tn__submenu-container.sagiriswd-tn__submenu-container`
+// rule scoped under `.sagiriswd-tn` that forces `overflow: visible !important`
+// (specificity 0-5-0, ties the hover rule; `!important` and source-order
+// from editor.scss break the tie).
+
+test.describe( 'T4 AC-EDITOR-HOVER-MODE-NO-SHIFT — hover-mode wrapper hover does not auto-scroll parent dropdown', () => {
+	test.beforeEach( async ( { page } ) => {
+		await loginToAdmin( page );
+	} );
+
+	test( 'T4 — Products container.scrollLeft remains 0 after hovering Products in hover mode', async ( { page } ) => {
+		const canvas = await openDesktopEditor( page, WIDE_VIEWPORT );
+
+		const inner = canvas.locator( '.sagiriswd-tn__inner' ).first();
+		if ( ( await inner.count() ) === 0 ) {
+			test.skip( true, 'Fixture gap: .sagiriswd-tn__inner not found.' );
+			return;
+		}
+
+		const productsWrapper = inner
+			.locator( '.sagiriswd-tn-item.has-child' )
+			.filter( { hasText: 'Products' } )
+			.first();
+		if ( ( await productsWrapper.count() ) === 0 ) {
+			test.skip( true, 'Fixture gap: "Products" not found.' );
+			return;
+		}
+
+		const productsId = await getBlockId( productsWrapper );
+
+		// Force hover mode by stripping the open-on-click class from every Submenu
+		// wrapper in the canvas. (The fixture's block attribute may be either, but
+		// the bug only manifests when hover mode is active; this normalizes state.)
+		await canvas.locator( '.sagiriswd-tn-item.open-on-click' ).evaluateAll( ( els ) => {
+			els.forEach( ( el ) => el.classList.remove( 'open-on-click' ) );
+		} );
+
+		await forceContainerOpen( canvas, productsId );
+
+		// Trigger real :hover via Playwright's hover() — synthetic dispatch doesn't
+		// activate CSS pseudo-classes.
+		await productsWrapper.hover();
+		await page.waitForTimeout( 250 );
+
+		const productsContainer = productsWrapper.locator(
+			':scope > .sagiriswd-tn__submenu-container'
+		);
+
+		const scrollLeft = await productsContainer.evaluate( ( el ) => el.scrollLeft );
+		const overflow = await productsContainer.evaluate( ( el ) => getComputedStyle( el ).overflow );
+
+		expect(
+			scrollLeft,
+			`Products container scrollLeft must remain 0 in hover mode. ` +
+			`Pre-fix: overflow: auto + nested flyout extending right makes ` +
+			`scrollWidth > clientWidth and the editor auto-scrolls leftward, ` +
+			`shifting every child to a wrong position.`
+		).toBe( 0 );
+
+		expect(
+			overflow,
+			`Products container overflow must be "visible" in the editor canvas ` +
+			`even when :hover fires. Pre-fix: frontend hover rule sets overflow:auto.`
+		).toBe( 'visible' );
+	} );
+} );
+
+// ─── T5: AC-EDITOR-HOVER-OPENS-LEAF ──────────────────────────────────────────
+//
+// Regression guard for hover-reveal of leaf Submenu blocks. The frontend hover
+// rule (`.has-child:not(.open-on-click):hover > .submenu-container`) gates on
+// `.has-child`, which only appears once a Submenu block has child blocks. A
+// leaf Submenu (e.g. "Configs" without any items) never carries `.has-child`,
+// so hovering it never opens its container — even in hover mode. The fix is
+// an editor-only CSS rule targeting `.wp-block-sagiriswd-tessenav-submenu`
+// directly so leaves are covered, allowing the inner-blocks appender to be
+// reached via hover.
+
+test.describe( 'T5 AC-EDITOR-HOVER-OPENS-LEAF — hovering a leaf Submenu block reveals its container', () => {
+	test.beforeEach( async ( { page } ) => {
+		await loginToAdmin( page );
+	} );
+
+	test( 'T5 — Configs (leaf) container becomes visible on hover in hover mode', async ( { page } ) => {
+		const canvas = await openDesktopEditor( page, WIDE_VIEWPORT );
+
+		const inner = canvas.locator( '.sagiriswd-tn__inner' ).first();
+		if ( ( await inner.count() ) === 0 ) {
+			test.skip( true, 'Fixture gap: .sagiriswd-tn__inner not found.' );
+			return;
+		}
+
+		// Drill to Configs: Products → Web Apps → Configs.
+		const productsWrapper = inner
+			.locator( '.sagiriswd-tn-item.has-child' )
+			.filter( { hasText: 'Products' } )
+			.first();
+		if ( ( await productsWrapper.count() ) === 0 ) {
+			test.skip( true, 'Fixture gap: "Products" not found.' );
+			return;
+		}
+		const productsId = await getBlockId( productsWrapper );
+
+		// Force hover mode by stripping the open-on-click class.
+		await canvas.locator( '.sagiriswd-tn-item.open-on-click' ).evaluateAll( ( els ) => {
+			els.forEach( ( el ) => el.classList.remove( 'open-on-click' ) );
+		} );
+
+		// Force Products and Web Apps containers visible so we can reach Configs.
+		await forceContainerOpen( canvas, productsId );
+
+		const productsContainer = productsWrapper.locator(
+			':scope > .sagiriswd-tn__submenu-container'
+		);
+		const webAppsWrapper = productsContainer
+			.locator( '.sagiriswd-tn-item.has-child' )
+			.filter( { hasText: 'Web Apps' } )
+			.first();
+		if ( ( await webAppsWrapper.count() ) === 0 ) {
+			test.skip( true, 'Fixture gap: "Web Apps" not found inside Products.' );
+			return;
+		}
+		const webAppsId = await getBlockId( webAppsWrapper );
+		await forceContainerOpen( canvas, webAppsId );
+
+		// Also force width:auto so Configs wrapper has a non-zero bounding box
+		// and Playwright's .hover() can reach it. The default closed-state CSS
+		// pins width:0; height:0 even after visibility:visible is forced.
+		await canvas.locator( `[data-block="${ webAppsId }"] > .sagiriswd-tn__submenu-container` ).evaluate( ( el ) => {
+			el.style.setProperty( 'width', 'auto', 'important' );
+			el.style.setProperty( 'height', 'auto', 'important' );
+			el.style.setProperty( 'min-width', '200px', 'important' );
+		} );
+
+		// Locate Configs — note: Configs is a LEAF, so the selector uses
+		// `.sagiriswd-tn-item` (not `.sagiriswd-tn-item.has-child`).
+		const webAppsContainer = webAppsWrapper.locator(
+			':scope > .sagiriswd-tn__submenu-container'
+		);
+		const configsWrapper = webAppsContainer
+			.locator( '.sagiriswd-tn-item' )
+			.filter( { hasText: 'Configs' } )
+			.first();
+		if ( ( await configsWrapper.count() ) === 0 ) {
+			test.skip( true, 'Fixture gap: "Configs" leaf not found inside Web Apps.' );
+			return;
+		}
+
+		const configsContainer = configsWrapper.locator(
+			':scope > .sagiriswd-tn__submenu-container'
+		);
+		if ( ( await configsContainer.count() ) === 0 ) {
+			test.skip( true, 'Fixture gap: Configs has no .sagiriswd-tn__submenu-container.' );
+			return;
+		}
+
+		// Strip any inner-blocks the editor may have injected into Configs'
+		// container so it matches the actual production case of a leaf
+		// Submenu with no children — `style.scss:42` then fires
+		// `:empty { display: none }` which `visibility:visible` alone cannot
+		// override. The fix has to set `display: flex` too.
+		await configsContainer.evaluate( ( el ) => {
+			while ( el.firstChild ) {
+				el.removeChild( el.firstChild );
+			}
+		} );
+
+		// Use real Playwright hover() — synthetic dispatch doesn't trigger
+		// CSS :hover. The hover state is held for the duration of the
+		// subsequent assertions because Playwright keeps the mouse there.
+		await configsWrapper.hover();
+		await page.waitForTimeout( 250 );
+
+		const styles = await configsContainer.evaluate( ( el ) => {
+			const s = getComputedStyle( el );
+			return { visibility: s.visibility, display: s.display };
+		} );
+
+		expect(
+			styles.visibility,
+			`Configs (leaf, empty container) must have visibility: visible on hover. ` +
+			`Pre-fix: the frontend hover rule requires .has-child which leaves don't have.`
+		).toBe( 'visible' );
+
+		expect(
+			styles.display,
+			`Configs container must have display !== "none" on hover. ` +
+			`Pre-fix: style.scss:42's \`:empty { display: none }\` removed the empty ` +
+			`container from layout entirely, and the hover rule only set ` +
+			`visibility/opacity — not display — so the container stayed hidden ` +
+			`even though :hover fired.`
+		).not.toBe( 'none' );
+	} );
+} );

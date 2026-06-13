@@ -156,6 +156,23 @@
   max-width: 100%;
 }
 
+/* Force submenu container to NOT scroll horizontally in the editor canvas.
+ * Frontend's compiled hover rule
+ * (`.sagiriswd-tn .has-child:not(.open-on-click):hover > .sagiriswd-tn__submenu-container`,
+ * specificity 0-5-0) sets `overflow: auto`. In hover mode the editor still
+ * fires `:hover` when the user mouses over a wrapper — `overflow: auto` plus
+ * the nested flyout extending past the parent's right edge makes
+ * `scrollWidth > clientWidth`, the editor auto-scrolls the parent leftward,
+ * and every child renders at a wrong x position. Issue #14 (continued):
+ * eliminate the scroll context inside the editor entirely. Tripled
+ * `.sagiriswd-tn__submenu-container` + the `.sagiriswd-tn` scope yields
+ * specificity 0-4-0 — below the frontend hover rule's 0-5-0. `!important`
+ * is what wins here; source order (editor.scss after style.scss) is
+ * supplementary. */
+.sagiriswd-tn .sagiriswd-tn__submenu-container.sagiriswd-tn__submenu-container.sagiriswd-tn__submenu-container {
+  overflow: visible !important;
+}
+
 /* Position: nested container fully OFF the parent container's border in the
  * editor preview. style.scss:316 uses `left: 100% !important; top: -1px` for a
  * border-merge convention (borders share 1px) that's fine on the frontend but
@@ -178,4 +195,38 @@
   left: auto !important;
   right: calc(100% + 1px) !important;
   top: -1px !important;
+}
+
+/* Hover-reveal for leaf Submenu blocks in the editor canvas. The frontend
+ * hover rule
+ * (`.sagiriswd-tn-submenu .has-child:not(.open-on-click):hover > .submenu-container`)
+ * gates on `.has-child`, which a Submenu block only carries once it has
+ * child blocks. A Submenu without children (e.g. "Configs" before any items
+ * are added) never receives `.has-child`, so hovering it never opens its
+ * container, even in hover mode. In the editor, authors want to hover into
+ * the empty container to use the inner-blocks appender and add the first
+ * child. This rule covers that gap by also revealing on hover for Submenu
+ * blocks NOT in click mode regardless of `.has-child` state.
+ *
+ * The selector intentionally targets `.wp-block-sagiriswd-tessenav-submenu`
+ * (the block-wrapper class) so it matches both leaves and has-child wrappers,
+ * but specificity-wise stays at 0-5-0 to tie the frontend rule. `editor.scss`
+ * source order breaks the tie in our favor. The properties mirror what
+ * `submenu/editor.scss` applies on `.is-selected` so the visual matches the
+ * selection-driven reveal that's already working. */
+.sagiriswd-tn .wp-block-sagiriswd-tessenav-submenu:not(.open-on-click):hover > .sagiriswd-tn__submenu-container {
+  /* `display: flex !important` overrides the `:empty { display: none }`
+   * rule in `style.scss:42` for Submenu blocks with no children yet.
+   * Without this, hovering a leaf reveals visibility/opacity but the
+   * empty container stays out of layout — invisible to the user. */
+  display: flex !important;
+  visibility: visible;
+  opacity: 1;
+  max-width: 1920px;
+  height: auto;
+  width: max-content;
+  position: absolute;
+  top: 100%;
+  overflow: visible;
+  min-width: 200px;
 }

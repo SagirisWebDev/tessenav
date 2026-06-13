@@ -205,13 +205,17 @@ $navigation-icon-size: 24px;
 		top: 100%;
 
 		// Indentation for all submenus.
-		// Nested submenus sit to the left on large breakpoints.
+		// Nested submenus sit to the right of their parent submenu on desktop,
+		// so the parent dropdown's siblings (and content) stay visible. The
+		// `!important` override is written further below at the top-level
+		// selector — within this nested scope the compiled descendant chain
+		// `.sagiriswd-tn-submenu .has-child …` cannot satisfy a real ancestor
+		// chain (in this DOM, `.sagiriswd-tn-submenu` and `.has-child` are the
+		// same element, and CSS descendant combinators require distinct
+		// elements).
 		// On smaller breakpoints, they open vertically, accordion-style.
 		@include m.break-medium {
 			.sagiriswd-tn__submenu-container {
-				left: 100%;
-				top: -1px; // Border width.
-
 				// Prevent the menu from disappearing when the mouse is over the gap
 				&::before {
 					content: "";
@@ -238,14 +242,19 @@ $navigation-icon-size: 24px;
 
 	// Custom menu items.
 	// Show submenus on hover unless they open on click.
+	// `min-width: 200px` is desktop-only — on mobile the overlay/navigator drives
+	// layout and a 200px floor would crowd narrow viewports.
 	&:not(.open-on-click):hover > .sagiriswd-tn__submenu-container {
 		visibility: visible;
 		overflow: visible;
 		opacity: 1;
 		width: auto;
 		height: auto;
-		min-width: 200px;
-    max-width: 1440px;
+		max-width: 1440px;
+
+		@include m.break-small {
+			min-width: 200px;
+		}
 	}
 
 	// Keep submenus open when focus is within.
@@ -255,8 +264,11 @@ $navigation-icon-size: 24px;
 		opacity: 1;
 		width: auto;
 		height: auto;
-		min-width: 200px;
-    max-width: 1440px;
+		max-width: 1440px;
+
+		@include m.break-small {
+			min-width: 200px;
+		}
 	}
 
 	// Show submenus on click.
@@ -266,8 +278,11 @@ $navigation-icon-size: 24px;
 		opacity: 1;
 		width: auto;
 		height: auto;
-		min-width: 200px;
-    max-width: 1440px;
+		max-width: 1440px;
+
+		@include m.break-small {
+			min-width: 200px;
+		}
 	}
 }
 
@@ -284,6 +299,22 @@ $navigation-icon-size: 24px;
 			left: 100%;
 			top: 0;
 		}
+	}
+}
+
+// On desktop, nested submenus must render OUTSIDE the parent dropdown's right
+// edge so the parent dropdown's siblings (and the user's content above) stay
+// visible. `src/tessenav-submenu/render.php` writes an inline `left:0px` (or
+// `right:0px`) on every submenu container, which would otherwise pin the
+// nested flyout on top of its parent. `!important` is required to override the
+// inline declaration; this selector chain (`.sagiriswd-tn .has-child
+// .sagiriswd-tn__submenu-container .sagiriswd-tn__submenu-container`) resolves
+// correctly because `.sagiriswd-tn` is the nav root — a real ancestor of the
+// `.has-child` items, distinct from them.
+@include m.break-medium {
+	.sagiriswd-tn .has-child .sagiriswd-tn__submenu-container .sagiriswd-tn__submenu-container {
+		left: 100% !important;
+		top: -1px !important;
 	}
 }
 
@@ -1245,6 +1276,90 @@ html.has-modal-open{
   background-color:inherit;
 }
 
+// ─── Nested submenu wrapper sizing ───────────────────────────────────────────
+//
+// `.sagiriswd-tn__submenu-container` is a flex column with the default
+// `align-items: stretch`, which forces every direct child to fill its width.
+// For nested submenu wrappers (`.sagiriswd-tn-submenu`) that means the
+// "Web Apps" wrapper visually fills the "Products" dropdown even though its
+// label is short — unlike top-level submenus, which sit inside a flex *row*
+// container (`.sagiriswd-tn__container`) and naturally hug their label.
+//
+// Set `align-self: flex-start` on the nested submenu wrapper so it sizes to
+// its content like its top-level siblings. Group/paragraph/etc. inner blocks
+// still stretch (they don't carry the `.sagiriswd-tn-submenu` class), so the
+// layout panel's sizing for those is unaffected.
+.sagiriswd-tn__submenu-container > .wp-block-sagiriswd-tessenav-submenu {
+  align-self: flex-start;
+  width: max-content;
+  max-width: 100%;
+  // Inherited `gap` (from the theme's block-gap variable) would otherwise sit
+  // between the wrapper's label and chevron, padding the wrapper width by ~20px
+  // beyond the visible content. Top-level submenus inside `.sagiriswd-tn__container`
+  // don't hit this because their margin-based spacing handles it differently.
+  gap: 0;
+}
+
+// Nested submenu hover-bridge (issue #13). The `width: max-content` wrapper
+// above shrinks the hover trigger to the label's footprint, but view.js
+// positions the nested flyout outside the parent dropdown — leaving a dead
+// zone between the label and the flyout that drops `:hover` on the wrapper
+// mid-traverse. A transparent `::after` extends the wrapper's hover surface
+// across the gap (and overlaps into the flyout for safety). Width is
+// generously oversized because the exact gap depends on label length and
+// dropdown width, neither knowable in CSS; the pseudo is `display: block`,
+// invisible, and height-limited to the wrapper's row so it doesn't catch
+// hover on siblings stacked below.
+//
+// Direction follows the nested flyout's placement: view.js writes
+// `data-tn-side="left"` on the child container when the flyout is flipped to
+// the left, and `:has()` mirrors the bridge to that side. Default (no
+// attribute or "right") extends rightward. Scoped to ≥782px — the
+// mobile/overlay accordion path doesn't position via flyout.
+@include m.break-medium {
+
+	.sagiriswd-tn__submenu-container > .wp-block-sagiriswd-tessenav-submenu.has-child::after {
+		content: "";
+		display: block;
+		position: absolute;
+		left: 100%;
+		top: 0;
+		height: 100%;
+		width: 500px;
+		pointer-events: auto;
+	}
+
+	.sagiriswd-tn__submenu-container
+		> .wp-block-sagiriswd-tessenav-submenu.has-child:has(> .sagiriswd-tn__submenu-container[data-tn-side="left"])::after {
+		left: auto;
+		right: 100%;
+	}
+}
+
+// ─── Submenu layout settings propagate to the items container ────────────────
+//
+// The block editor's Layout panel writes `is-vertical`, `is-nowrap`, and
+// `is-content-justification-*` classes on the block wrapper
+// (`.wp-block-sagiriswd-tessenav-submenu`). The items actually live in the
+// inner `.sagiriswd-tn__submenu-container`, so without these rules the
+// settings have no visible effect on what the author sees.
+//
+// `is-horizontal` is intentionally NOT bridged: WP's flex layout applies it
+// by default to every flex block, so honouring it would force every legacy
+// submenu's inner container into a row layout. The block.json default has
+// been switched to `orientation: vertical` so new submenus author cleanly;
+// users wanting a row layout for nested items can opt in via theme CSS.
+.wp-block-sagiriswd-tessenav-submenu {
+  &.is-vertical > .sagiriswd-tn__submenu-container { flex-direction: column; }
+
+  &.is-content-justification-left > .sagiriswd-tn__submenu-container { justify-content: flex-start; }
+  &.is-content-justification-center > .sagiriswd-tn__submenu-container { justify-content: center; }
+  &.is-content-justification-right > .sagiriswd-tn__submenu-container { justify-content: flex-end; }
+  &.is-content-justification-space-between > .sagiriswd-tn__submenu-container { justify-content: space-between; }
+
+  &.is-nowrap > .sagiriswd-tn__submenu-container { flex-wrap: nowrap; }
+}
+
 // ─── Navigator UX (mobile drill-down overlay) ────────────────────────────────
 
 // Navigator wrapper is hidden by default; only shown inside the mobile overlay.
@@ -1253,10 +1368,17 @@ html.has-modal-open{
 }
 
 // Show navigator when overlay opens (mobile).
+// `overflow-x: hidden` clips off-screen siblings during the slide animation;
+// `overflow-y: visible` lets the screen's content extend vertically so the
+// responsive-container (which has `overflow: auto`) can scroll the page —
+// otherwise tall submenu content beyond the navigator wrapper's flex height
+// would be unreachable.
 .sagiriswd-tn__responsive-container.is-menu-open .sagiriswd-tn__navigator-wrapper {
   display: block;
   flex: 1 1 auto;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
+  width: 100%;
 }
 
 // When overlay is open, hide the normal container and show navigator instead.
@@ -1280,11 +1402,33 @@ html.has-modal-open{
   }
 }
 
-// Navigator container — clips screens and provides slide context.
+// Navigator container — clips screens horizontally for slide animations, but
+// lets vertical content extend so the responsive-container scrolls the page.
 .sagiriswd-tn__navigator {
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
   width: 100%;
+}
+
+// Each navigator screen wraps its content within the navigator width so wide
+// inner blocks (images, embeds, code blocks) don't push a horizontal scrollbar
+// onto the page. Vertical overflow is intentionally allowed — the parent
+// responsive-container has `overflow: auto`, so tall content scrolls naturally.
+.sagiriswd-tn__navigator-screen {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  // Each direct child caps at the screen width — images, embeds, and other
+  // block content can't blow past the navigator.
+  > * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  img, video, iframe {
+    max-width: 100%;
+    height: auto;
+  }
 }
 
 // Individual screens — hidden by default, visible when active.

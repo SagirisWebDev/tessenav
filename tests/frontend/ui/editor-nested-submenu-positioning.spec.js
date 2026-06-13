@@ -59,7 +59,12 @@ const EDITOR_TIMEOUT = 30_000;
 const EDGE_FUZZ      = 2; // sub-pixel rounding tolerance in px
 
 // Wide viewport — TesseNav floats to the left; right-side placement fits.
-const WIDE_VIEWPORT   = { width: 1280, height: 900 };
+// 2400 leaves >1200px of horizontal room past Products' container on the test
+// fixture (which carries menuMaxWidth=900 from 8eae1dc, so Products renders
+// 900px wide and Web Apps needs another 300px on the right). The previous
+// 1280 width forced view.js's side picker to flip left because Products +
+// Web Apps couldn't both fit inside the block right.
+const WIDE_VIEWPORT   = { width: 2400, height: 900 };
 // Narrow viewport used by T3 so the constrained block near the right edge overflows.
 const NARROW_VIEWPORT = { width: 900, height: 900 };
 

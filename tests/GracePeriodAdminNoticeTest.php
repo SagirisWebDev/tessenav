@@ -2,94 +2,92 @@
 /**
  * Tests for sagiriswd_tessenav_grace_period_admin_notice().
  *
+ * Grace period is triggered by subscription lapse (expiry timestamp in the past),
+ * not by plugin deactivation. State is driven through wp_options.
+ *
  * @package Sagiriswd
- */
-
-/**
- * Tests the persistent admin notice shown during the premium grace period.
  */
 class GracePeriodAdminNoticeTest extends WP_UnitTestCase {
 
-	/**
-	 * Sets up an admin user before each test so current_user_can('manage_options') passes.
-	 */
 	public function set_up(): void {
 		parent::set_up();
 		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $admin );
 	}
 
-	/**
-	 * Cleans up filters, options, and current user after each test.
-	 */
 	public function tear_down(): void {
-		remove_all_filters( 'sagiriswd_tessenav_is_premium_plugin_active' );
-		delete_option( 'sagiriswd_premium_deactivated_at' );
+		delete_option( 'sagiriswd_bundle_license_status' );
+		delete_option( 'sagiriswd_tessenav_license_status' );
 		wp_set_current_user( 0 );
 		parent::tear_down();
 	}
 
-	/**
-	 * Captures the output of the admin notice function.
-	 */
 	private function capture_notice(): string {
 		ob_start();
 		sagiriswd_tessenav_grace_period_admin_notice();
 		return ob_get_clean();
 	}
 
-	/**
-	 * Tests that no notice is shown when the premium plugin is active.
-	 */
-	public function test_no_notice_when_premium_active(): void {
-		add_filter( 'sagiriswd_tessenav_is_premium_plugin_active', '__return_true' );
+	// ── No notice when premium is active ─────────────────────────────────────
 
-		$output = $this->capture_notice();
+	public function test_no_notice_when_bundle_key_valid(): void {
+		update_option( 'sagiriswd_bundle_license_status', array( 'valid' => true, 'expiry' => null ) );
 
-		$this->assertEmpty( $output );
+		$this->assertEmpty( $this->capture_notice() );
 	}
 
-	/**
-	 * Tests that no notice is shown on a fresh free install (no deactivation timestamp).
-	 */
+	public function test_no_notice_when_individual_key_valid(): void {
+		update_option( 'sagiriswd_tessenav_license_status', array( 'valid' => true, 'expiry' => time() + DAY_IN_SECONDS ) );
+
+		$this->assertEmpty( $this->capture_notice() );
+	}
+
+	// ── No notice on a fresh free install (no options stored) ────────────────
+
 	public function test_no_notice_when_fresh_free_install(): void {
-		add_filter( 'sagiriswd_tessenav_is_premium_plugin_active', '__return_false' );
-
-		$output = $this->capture_notice();
-
-		$this->assertEmpty( $output );
+		$this->assertEmpty( $this->capture_notice() );
 	}
 
-	/**
-	 * Tests that no notice is shown after the grace period has expired (31 days).
-	 */
+	// ── No notice after grace period has fully expired ────────────────────────
+
 	public function test_no_notice_when_grace_period_expired(): void {
-		add_filter( 'sagiriswd_tessenav_is_premium_plugin_active', '__return_false' );
-		update_option( 'sagiriswd_premium_deactivated_at', time() - ( 31 * DAY_IN_SECONDS ) );
+		update_option( 'sagiriswd_tessenav_license_status', array(
+			'valid'  => false,
+			'expiry' => time() - ( 31 * DAY_IN_SECONDS ),
+		) );
 
-		$output = $this->capture_notice();
-
-		$this->assertEmpty( $output );
+		$this->assertEmpty( $this->capture_notice() );
 	}
 
-	/**
-	 * Tests that no notice is shown at the exact grace period boundary (30 days elapsed).
-	 */
+	// ── No notice at the exact 30-day grace period boundary ──────────────────
+
 	public function test_no_notice_at_exact_grace_period_boundary(): void {
-		add_filter( 'sagiriswd_tessenav_is_premium_plugin_active', '__return_false' );
-		update_option( 'sagiriswd_premium_deactivated_at', time() - ( TESSENAV_GRACE_PERIOD_DAYS * DAY_IN_SECONDS ) );
+		update_option( 'sagiriswd_tessenav_license_status', array(
+			'valid'  => false,
+			'expiry' => time() - ( TESSENAV_GRACE_PERIOD_DAYS * DAY_IN_SECONDS ),
+		) );
 
-		$output = $this->capture_notice();
-
-		$this->assertEmpty( $output );
+		$this->assertEmpty( $this->capture_notice() );
 	}
 
-	/**
-	 * Tests that the error-class notice is shown during the grace period.
-	 */
+	// ── No notice on manual key removal (no expiry stored) ───────────────────
+
+	public function test_no_notice_when_key_manually_removed(): void {
+		update_option( 'sagiriswd_tessenav_license_status', array(
+			'valid'  => false,
+			'expiry' => null,
+		) );
+
+		$this->assertEmpty( $this->capture_notice() );
+	}
+
+	// ── Notice shown during grace period ─────────────────────────────────────
+
 	public function test_notice_shown_during_grace_period(): void {
-		add_filter( 'sagiriswd_tessenav_is_premium_plugin_active', '__return_false' );
-		update_option( 'sagiriswd_premium_deactivated_at', time() );
+		update_option( 'sagiriswd_tessenav_license_status', array(
+			'valid'  => false,
+			'expiry' => time(),
+		) );
 
 		$output = $this->capture_notice();
 
@@ -98,26 +96,26 @@ class GracePeriodAdminNoticeTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( TESSENAV_UPGRADE_URL, $output );
 	}
 
-	/**
-	 * Tests that the notice shows the correct number of days remaining.
-	 */
+	// ── Notice shows correct days remaining ──────────────────────────────────
+
 	public function test_notice_shows_days_remaining(): void {
-		add_filter( 'sagiriswd_tessenav_is_premium_plugin_active', '__return_false' );
-		// 5 days elapsed leaves 25 days remaining (ceil(30 - 5) = 25).
-		update_option( 'sagiriswd_premium_deactivated_at', time() - ( 5 * DAY_IN_SECONDS ) );
+		// 5 days since expiry → ceil(30 - 5) = 25 days remaining.
+		update_option( 'sagiriswd_tessenav_license_status', array(
+			'valid'  => false,
+			'expiry' => time() - ( 5 * DAY_IN_SECONDS ),
+		) );
 
-		$output = $this->capture_notice();
-
-		$this->assertStringContainsString( '25', $output );
+		$this->assertStringContainsString( '25', $this->capture_notice() );
 	}
 
-	/**
-	 * Tests that the notice uses singular "day" when exactly 1 day remains.
-	 */
+	// ── Notice uses singular "day" at 1 day remaining ────────────────────────
+
 	public function test_notice_singular_day(): void {
-		add_filter( 'sagiriswd_tessenav_is_premium_plugin_active', '__return_false' );
-		// 29 days elapsed leaves 1 day remaining (ceil(30 - 29) = 1).
-		update_option( 'sagiriswd_premium_deactivated_at', time() - ( 29 * DAY_IN_SECONDS ) );
+		// 29 days since expiry → ceil(30 - 29) = 1 day remaining.
+		update_option( 'sagiriswd_tessenav_license_status', array(
+			'valid'  => false,
+			'expiry' => time() - ( 29 * DAY_IN_SECONDS ),
+		) );
 
 		$output = $this->capture_notice();
 
@@ -125,30 +123,42 @@ class GracePeriodAdminNoticeTest extends WP_UnitTestCase {
 		$this->assertStringNotContainsString( '1 days', $output );
 	}
 
-	/**
-	 * Tests that the notice is not dismissible.
-	 */
+	// ── Notice is not dismissible ─────────────────────────────────────────────
+
 	public function test_notice_is_not_dismissible(): void {
-		add_filter( 'sagiriswd_tessenav_is_premium_plugin_active', '__return_false' );
-		update_option( 'sagiriswd_premium_deactivated_at', time() );
+		update_option( 'sagiriswd_tessenav_license_status', array(
+			'valid'  => false,
+			'expiry' => time(),
+		) );
 
-		$output = $this->capture_notice();
-
-		$this->assertStringNotContainsString( 'is-dismissible', $output );
+		$this->assertStringNotContainsString( 'is-dismissible', $this->capture_notice() );
 	}
 
-	/**
-	 * Tests that non-admin users do not see the notice.
-	 */
+	// ── Non-admin users do not see the notice ────────────────────────────────
+
 	public function test_no_notice_for_non_admin_user(): void {
-		add_filter( 'sagiriswd_tessenav_is_premium_plugin_active', '__return_false' );
-		update_option( 'sagiriswd_premium_deactivated_at', time() );
+		update_option( 'sagiriswd_tessenav_license_status', array(
+			'valid'  => false,
+			'expiry' => time(),
+		) );
 
 		$subscriber = self::factory()->user->create( array( 'role' => 'subscriber' ) );
 		wp_set_current_user( $subscriber );
 
+		$this->assertEmpty( $this->capture_notice() );
+	}
+
+	// ── Grace period notice also triggers via bundle lapse ───────────────────
+
+	public function test_notice_shown_during_bundle_grace_period(): void {
+		update_option( 'sagiriswd_bundle_license_status', array(
+			'valid'  => false,
+			'expiry' => time() - ( 5 * DAY_IN_SECONDS ),
+		) );
+
 		$output = $this->capture_notice();
 
-		$this->assertEmpty( $output );
+		$this->assertStringContainsString( 'notice-error', $output );
+		$this->assertStringContainsString( 'grace period', $output );
 	}
 }

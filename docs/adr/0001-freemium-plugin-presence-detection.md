@@ -1,7 +1,7 @@
 # ADR 0001 — Freemium detection via plugin-presence constant
 
 ## Status
-Accepted
+Superseded by `sagiris-premium-blocks` ADR-0002 (license key detection model)
 
 ## Context
 TesseNav needs to enforce a 3-top-level-submenu limit for free users and remove it for premium users. Several detection mechanisms were considered: Freemius SDK, custom license keys, plugin presence check.

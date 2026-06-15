@@ -39,7 +39,7 @@ function sagiriswd_tessenav_premium_status() {
 		);
 	}
 
-	$deactivated_at = get_option( 'tessenav_premium_deactivated_at' );
+	$deactivated_at = get_option( 'sagiriswd_premium_deactivated_at' );
 
 	if ( ! $deactivated_at ) {
 		return array(

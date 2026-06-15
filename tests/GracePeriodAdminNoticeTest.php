@@ -24,7 +24,7 @@ class GracePeriodAdminNoticeTest extends WP_UnitTestCase {
 	 */
 	public function tear_down(): void {
 		remove_all_filters( 'sagiriswd_tessenav_is_premium_plugin_active' );
-		delete_option( 'tessenav_premium_deactivated_at' );
+		delete_option( 'sagiriswd_premium_deactivated_at' );
 		wp_set_current_user( 0 );
 		parent::tear_down();
 	}
@@ -65,7 +65,7 @@ class GracePeriodAdminNoticeTest extends WP_UnitTestCase {
 	 */
 	public function test_no_notice_when_grace_period_expired(): void {
 		add_filter( 'sagiriswd_tessenav_is_premium_plugin_active', '__return_false' );
-		update_option( 'tessenav_premium_deactivated_at', time() - ( 31 * DAY_IN_SECONDS ) );
+		update_option( 'sagiriswd_premium_deactivated_at', time() - ( 31 * DAY_IN_SECONDS ) );
 
 		$output = $this->capture_notice();
 
@@ -77,7 +77,7 @@ class GracePeriodAdminNoticeTest extends WP_UnitTestCase {
 	 */
 	public function test_no_notice_at_exact_grace_period_boundary(): void {
 		add_filter( 'sagiriswd_tessenav_is_premium_plugin_active', '__return_false' );
-		update_option( 'tessenav_premium_deactivated_at', time() - ( TESSENAV_GRACE_PERIOD_DAYS * DAY_IN_SECONDS ) );
+		update_option( 'sagiriswd_premium_deactivated_at', time() - ( TESSENAV_GRACE_PERIOD_DAYS * DAY_IN_SECONDS ) );
 
 		$output = $this->capture_notice();
 
@@ -89,7 +89,7 @@ class GracePeriodAdminNoticeTest extends WP_UnitTestCase {
 	 */
 	public function test_notice_shown_during_grace_period(): void {
 		add_filter( 'sagiriswd_tessenav_is_premium_plugin_active', '__return_false' );
-		update_option( 'tessenav_premium_deactivated_at', time() );
+		update_option( 'sagiriswd_premium_deactivated_at', time() );
 
 		$output = $this->capture_notice();
 
@@ -104,7 +104,7 @@ class GracePeriodAdminNoticeTest extends WP_UnitTestCase {
 	public function test_notice_shows_days_remaining(): void {
 		add_filter( 'sagiriswd_tessenav_is_premium_plugin_active', '__return_false' );
 		// 5 days elapsed leaves 25 days remaining (ceil(30 - 5) = 25).
-		update_option( 'tessenav_premium_deactivated_at', time() - ( 5 * DAY_IN_SECONDS ) );
+		update_option( 'sagiriswd_premium_deactivated_at', time() - ( 5 * DAY_IN_SECONDS ) );
 
 		$output = $this->capture_notice();
 
@@ -117,7 +117,7 @@ class GracePeriodAdminNoticeTest extends WP_UnitTestCase {
 	public function test_notice_singular_day(): void {
 		add_filter( 'sagiriswd_tessenav_is_premium_plugin_active', '__return_false' );
 		// 29 days elapsed leaves 1 day remaining (ceil(30 - 29) = 1).
-		update_option( 'tessenav_premium_deactivated_at', time() - ( 29 * DAY_IN_SECONDS ) );
+		update_option( 'sagiriswd_premium_deactivated_at', time() - ( 29 * DAY_IN_SECONDS ) );
 
 		$output = $this->capture_notice();
 
@@ -130,7 +130,7 @@ class GracePeriodAdminNoticeTest extends WP_UnitTestCase {
 	 */
 	public function test_notice_is_not_dismissible(): void {
 		add_filter( 'sagiriswd_tessenav_is_premium_plugin_active', '__return_false' );
-		update_option( 'tessenav_premium_deactivated_at', time() );
+		update_option( 'sagiriswd_premium_deactivated_at', time() );
 
 		$output = $this->capture_notice();
 
@@ -142,7 +142,7 @@ class GracePeriodAdminNoticeTest extends WP_UnitTestCase {
 	 */
 	public function test_no_notice_for_non_admin_user(): void {
 		add_filter( 'sagiriswd_tessenav_is_premium_plugin_active', '__return_false' );
-		update_option( 'tessenav_premium_deactivated_at', time() );
+		update_option( 'sagiriswd_premium_deactivated_at', time() );
 
 		$subscriber = self::factory()->user->create( array( 'role' => 'subscriber' ) );
 		wp_set_current_user( $subscriber );

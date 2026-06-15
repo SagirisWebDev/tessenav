@@ -9,7 +9,7 @@ class PremiumStatusTest extends WP_UnitTestCase {
 
 	public function tear_down(): void {
 		remove_all_filters( 'sagiriswd_tessenav_is_premium_plugin_active' );
-		delete_option( 'tessenav_premium_deactivated_at' );
+		delete_option( 'sagiriswd_premium_deactivated_at' );
 		parent::tear_down();
 	}
 
@@ -35,7 +35,7 @@ class PremiumStatusTest extends WP_UnitTestCase {
 
 	public function test_not_premium_within_grace_period(): void {
 		add_filter( 'sagiriswd_tessenav_is_premium_plugin_active', '__return_false' );
-		update_option( 'tessenav_premium_deactivated_at', time() - ( 5 * DAY_IN_SECONDS ) );
+		update_option( 'sagiriswd_premium_deactivated_at', time() - ( 5 * DAY_IN_SECONDS ) );
 
 		$status = sagiriswd_tessenav_premium_status();
 
@@ -47,7 +47,7 @@ class PremiumStatusTest extends WP_UnitTestCase {
 
 	public function test_not_premium_grace_period_expired(): void {
 		add_filter( 'sagiriswd_tessenav_is_premium_plugin_active', '__return_false' );
-		update_option( 'tessenav_premium_deactivated_at', time() - ( 31 * DAY_IN_SECONDS ) );
+		update_option( 'sagiriswd_premium_deactivated_at', time() - ( 31 * DAY_IN_SECONDS ) );
 
 		$status = sagiriswd_tessenav_premium_status();
 

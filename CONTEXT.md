@@ -25,15 +25,21 @@ Unlocked when the `sagiris-premium-blocks` plugin is also active. Removes the su
 The standalone free plugin. Self-contained — works without `sagiris-premium-blocks`. Enforces free-tier limits when premium is not detected.
 
 **sagiris-premium-blocks** (`sagiris-premium-blocks/sagiris-premium-blocks.php`)
-The premium bundle plugin. Defines the `SAGIRIS_PREMIUM_BLOCKS_VERSION` constant on init. Its presence (detected via `defined('SAGIRIS_PREMIUM_BLOCKS_VERSION')`) signals premium tier to the `tessenav` plugin.
+The license manager plugin for the Sagiris block ecosystem. Manages the Bundle License Key, runs daily validation, and writes `sagiriswd_bundle_license_status` to `wp_options`. Its presence is not required for individual TesseNav licensing but is required for bundle licensing to function.
 
 ## Tiers (continued)
 
+**License Priority**
+The order `tessenav` uses to resolve premium status: (1) read `sagiriswd_bundle_license_status` from `wp_options` — if valid, Premium Tier; (2) read `sagiriswd_tessenav_license_status` — if valid, Premium Tier; (3) Free Tier.
+
+**TesseNav License Key**
+An Individual License Key granting Premium Tier access to `tessenav` only. Entered in the Sagiris > TesseNav admin settings page. Validated daily via WP cron; result cached in `sagiriswd_tessenav_license_status`.
+
 **Grace Period**
-A 30-day window after `sagiris-premium-blocks` is deactivated during which the frontend continues to render all submenus regardless of count. Tracked via the `tessenav_premium_deactivated_at` timestamp in `wp_options`, written by `sagiris-premium-blocks`'s deactivation hook, read by `tessenav`. After expiry, the frontend silently drops top-level submenus beyond index 3. A persistent WP admin notice counts down the remaining days.
+A 30-day window after a license subscription lapses (expiry date passes without renewal) during which the frontend continues to render all submenus regardless of count. Triggered by subscription lapse only — not by manual key removal. Calculated from the expiry timestamp in the cached license status. After expiry, the frontend silently drops top-level submenus beyond index 3. A persistent WP admin notice counts down the remaining days.
 
 **Upgrade URL**
-The external purchase/marketing URL for `sagiris-premium-blocks`. Defined as `TESSENAV_UPGRADE_URL` in `tessenav.php` and passed to editor JS via `wp_localize_script`. Currently a placeholder.
+The external purchase/marketing URL for TesseNav Premium and `sagiris-premium-blocks`. Defined as `TESSENAV_UPGRADE_URL` in `tessenav.php` and passed to editor JS via `wp_localize_script`. Currently a placeholder.
 
 ## Mobile UX
 

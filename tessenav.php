@@ -21,17 +21,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'TESSENAV_GRACE_PERIOD_DAYS', 30 );
 define( 'TESSENAV_UPGRADE_URL', 'https://example.com/upgrade' ); // Placeholder.
 
+require_once __DIR__ . '/includes/license-validator.php';
+require_once __DIR__ . '/includes/admin-settings.php';
+
 /**
  * Returns the current premium status for TesseNav.
+ *
+ * Priority: (1) valid bundle license, (2) valid individual key, (3) grace period, (4) free tier.
  *
  * @return array{ isPremium: bool, inGracePeriod: bool, graceDaysRemaining: int }
  */
 function sagiriswd_tessenav_premium_status() {
-	$plugin_active = defined( 'SAGIRIS_PREMIUM_BLOCKS_VERSION' );
-	// Filterable for testing without being able to undefine constants.
-	$plugin_active = (bool) apply_filters( 'sagiriswd_tessenav_is_premium_plugin_active', $plugin_active );
+	$bundle_status   = get_option( 'sagiriswd_bundle_license_status', array( 'valid' => false, 'expiry' => null ) );
+	$individual_status = get_option( 'sagiriswd_tessenav_license_status', array( 'valid' => false, 'expiry' => null ) );
 
-	if ( $plugin_active ) {
+	if ( ! empty( $bundle_status['valid'] ) || ! empty( $individual_status['valid'] ) ) {
 		return array(
 			'isPremium'          => true,
 			'inGracePeriod'      => false,
@@ -39,24 +43,13 @@ function sagiriswd_tessenav_premium_status() {
 		);
 	}
 
-	$deactivated_at = get_option( 'sagiriswd_premium_deactivated_at' );
+	$grace = sagiriswd_tessenav_resolve_grace_period( $bundle_status, $individual_status );
 
-	if ( ! $deactivated_at ) {
-		return array(
-			'isPremium'          => false,
-			'inGracePeriod'      => false,
-			'graceDaysRemaining' => 0,
-		);
-	}
-
-	$days_elapsed   = ( time() - (int) $deactivated_at ) / DAY_IN_SECONDS;
-	$days_remaining = (int) ceil( TESSENAV_GRACE_PERIOD_DAYS - $days_elapsed );
-
-	if ( $days_remaining > 0 ) {
+	if ( $grace['inGracePeriod'] ) {
 		return array(
 			'isPremium'          => false,
 			'inGracePeriod'      => true,
-			'graceDaysRemaining' => $days_remaining,
+			'graceDaysRemaining' => $grace['graceDaysRemaining'],
 		);
 	}
 
@@ -64,6 +57,43 @@ function sagiriswd_tessenav_premium_status() {
 		'isPremium'          => false,
 		'inGracePeriod'      => false,
 		'graceDaysRemaining' => 0,
+	);
+}
+
+/**
+ * Determines whether either the bundle or individual license is within the 30-day
+ * grace period after subscription lapse. Returns the highest days-remaining value.
+ *
+ * Grace period only applies when a subscription has lapsed (expiry in the past).
+ * Manual key removal clears the status option entirely, so expiry will be null
+ * and no grace period is granted.
+ *
+ * @param array $bundle_status     { valid: bool, expiry: int|null }
+ * @param array $individual_status { valid: bool, expiry: int|null }
+ * @return array{ inGracePeriod: bool, graceDaysRemaining: int }
+ */
+function sagiriswd_tessenav_resolve_grace_period( $bundle_status, $individual_status ) {
+	$best_remaining = 0;
+	$now            = time();
+
+	foreach ( array( $bundle_status, $individual_status ) as $status ) {
+		if ( empty( $status['expiry'] ) ) {
+			continue;
+		}
+		$expiry = (int) $status['expiry'];
+		if ( $now <= $expiry ) {
+			continue; // Still within subscription window — not lapsed yet.
+		}
+		$days_since_expiry = ( $now - $expiry ) / DAY_IN_SECONDS;
+		$days_remaining    = (int) ceil( TESSENAV_GRACE_PERIOD_DAYS - $days_since_expiry );
+		if ( $days_remaining > 0 ) {
+			$best_remaining = max( $best_remaining, $days_remaining );
+		}
+	}
+
+	return array(
+		'inGracePeriod'      => $best_remaining > 0,
+		'graceDaysRemaining' => $best_remaining,
 	);
 }
 
@@ -161,6 +191,57 @@ function sagiriswd_tessenav_block_init() {
 	}
 }
 add_action( 'init', 'sagiriswd_tessenav_block_init' );
+
+// ─── Daily license validation cron ───────────────────────────────────────────
+
+function sagiriswd_tessenav_maybe_schedule_cron() {
+	if ( ! wp_next_scheduled( 'sagiriswd_tessenav_daily_validate' ) ) {
+		wp_schedule_event( time(), 'daily', 'sagiriswd_tessenav_daily_validate' );
+	}
+}
+add_action( 'init', 'sagiriswd_tessenav_maybe_schedule_cron' );
+
+add_action( 'sagiriswd_tessenav_daily_validate', 'sagiriswd_tessenav_validate_license' );
+
+// ─── Individual key + bundle notice ──────────────────────────────────────────
+
+/**
+ * Shows an admin notice when both a bundle key and an individual TesseNav key
+ * are active. Reminds the user that the individual key is still being billed
+ * and can be used on another domain.
+ */
+function sagiriswd_tessenav_individual_key_notice() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	$bundle_status = get_option( 'sagiriswd_bundle_license_status', array( 'valid' => false ) );
+	if ( empty( $bundle_status['valid'] ) ) {
+		return;
+	}
+
+	if ( ! get_option( 'sagiriswd_tessenav_license_key' ) ) {
+		return;
+	}
+
+	$manage_url = admin_url( 'admin.php?page=tessenav-license' );
+
+	printf(
+		'<div class="notice notice-info"><p>%s</p></div>',
+		wp_kses(
+			sprintf(
+				/* translators: %s: URL to TesseNav license settings */
+				__( '<strong>TesseNav:</strong> Your individual license key is active and still being billed separately from your bundle. You can use it on another domain. <a href="%s">Manage your individual license</a>.', 'tessenav' ),
+				esc_url( $manage_url )
+			),
+			array(
+				'strong' => array(),
+				'a'      => array( 'href' => array() ),
+			)
+		)
+	);
+}
+add_action( 'admin_notices', 'sagiriswd_tessenav_individual_key_notice' );
 
 // ─── Navigator rendering helpers ─────────────────────────────────────────────
 // Loaded here so PHPUnit tests can call them without having to include the

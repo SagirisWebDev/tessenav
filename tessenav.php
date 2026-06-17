@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'TESSENAV_GRACE_PERIOD_DAYS', 30 );
-define( 'TESSENAV_UPGRADE_URL', 'https://example.com/upgrade' ); // Placeholder.
+define( 'TESSENAV_UPGRADE_URL', 'https://sagiriswd.lemonsqueezy.com/checkout/buy/1804446' );
 
 require_once __DIR__ . '/includes/license-validator.php';
 require_once __DIR__ . '/includes/admin-settings.php';

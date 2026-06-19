@@ -170,9 +170,18 @@ $navigation-icon-size: 24px;
 
 		// Hide until hover or focus within.
 		opacity: 0;
-		@media not (prefers-reduced-motion) {
-			transition: opacity 0.1s linear;
-		}
+		// Delay the close transition so brief :hover loss while the cursor
+		// traverses gaps (button → flyout, parent flyout → nested flyout)
+		// doesn't immediately collapse the dropdown. Re-entering a descendant
+		// within the delay window re-triggers :hover, cancelling the close.
+		// The :hover rule below overrides this with instant transitions so
+		// opening still feels immediate.
+		transition:
+			opacity 0.1s linear,
+			visibility 0s linear 0.15s,
+			width 0s linear 0.15s,
+			height 0s linear 0.15s,
+			overflow 0s linear 0.15s;
 		visibility: hidden;
 
 		// Don't take up space when the menu is collapsed.
@@ -216,7 +225,11 @@ $navigation-icon-size: 24px;
 		// On smaller breakpoints, they open vertically, accordion-style.
 		@include m.break-medium {
 			.sagiriswd-tn__submenu-container {
-				// Prevent the menu from disappearing when the mouse is over the gap
+				// Small bridge between the parent flyout's right edge and this
+				// nested flyout's left edge (sub-pixel rounding from inline
+				// `left` positioning). The much larger gap between the wrapper
+				// and the flyout is bridged by the wrapper's ::after pseudo
+				// further down in this file (search for `--tn-hover-bridge-self`).
 				&::before {
 					content: "";
 					position: absolute;
@@ -251,6 +264,14 @@ $navigation-icon-size: 24px;
 		width: auto;
 		height: auto;
 		max-width: 1440px;
+		// Open instantly — undo the delayed close transitions inherited from
+		// the closed state. Opacity keeps its 0.1s fade for smoothness.
+		transition:
+			opacity 0.1s linear,
+			visibility 0s linear 0s,
+			width 0s linear 0s,
+			height 0s linear 0s,
+			overflow 0s linear 0s;
 
 		@include m.break-small {
 			min-width: 200px;
@@ -1309,11 +1330,11 @@ html.has-modal-open{
 // positions the nested flyout outside the parent dropdown — leaving a dead
 // zone between the label and the flyout that drops `:hover` on the wrapper
 // mid-traverse. A transparent `::after` extends the wrapper's hover surface
-// across the gap (and overlaps into the flyout for safety). Width is
-// generously oversized because the exact gap depends on label length and
-// dropdown width, neither knowable in CSS; the pseudo is `display: block`,
-// invisible, and height-limited to the wrapper's row so it doesn't catch
-// hover on siblings stacked below.
+// across the gap (and overlaps into the flyout for safety). The exact gap is
+// measured by view.js (`tnApplySide`) and written to the child container as
+// `--tn-hover-bridge`; we read it back with a `:has()` selector. A small
+// fixed overshoot beyond the gap covers sub-pixel rounding without catching
+// hover on far-side siblings.
 //
 // Direction follows the nested flyout's placement: view.js writes
 // `data-tn-side="left"` on the child container when the flyout is flipped to
@@ -1329,10 +1350,14 @@ html.has-modal-open{
 		left: 100%;
 		top: 0;
 		height: 100%;
-		width: 500px;
+		// Read the measured gap from the child container, plus a small
+		// overshoot for sub-pixel rounding. Fallback is generous in case JS
+		// hasn't run (initial paint, no-JS, etc.).
+		width: calc(var(--tn-hover-bridge-self, 500px) + 4px);
 		pointer-events: auto;
 	}
 
+	// Mirror the bridge to the other side when the flyout flips left.
 	.sagiriswd-tn__submenu-container
 		> .wp-block-sagiriswd-tessenav-submenu.has-child:has(> .sagiriswd-tn__submenu-container[data-tn-side="left"])::after {
 		left: auto;

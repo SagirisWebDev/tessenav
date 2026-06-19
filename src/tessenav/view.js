@@ -60,6 +60,8 @@ function tnClearSubmenuSide( container ) {
 	container.style.removeProperty( 'left' );
 	container.style.removeProperty( 'right' );
 	delete container.dataset.tnSide;
+	const wrapper = container.parentElement;
+	wrapper?.style?.removeProperty( '--tn-hover-bridge-self' );
 }
 
 function tnApplySide( container, side, parentSubmenuBox, wrapperBox, width ) {
@@ -77,6 +79,17 @@ function tnApplySide( container, side, parentSubmenuBox, wrapperBox, width ) {
 	container.style.setProperty( 'left', `${ Math.round( leftPx ) }px`, 'important' );
 	container.style.setProperty( 'right', 'auto', 'important' );
 	container.dataset.tnSide = side;
+
+	// Hover-bridge width: distance from the wrapper's outer edge to the
+	// flyout's inner edge. The wrapper's CSS ::after pseudo reads this
+	// variable to size its hover surface across the gap, so the cursor
+	// doesn't land in dead space mid-traverse.
+	const bridgePx =
+		side === 'right'
+			? Math.max( 0, leftPx - wrapperBox.width )
+			: Math.max( 0, -leftPx );
+	const wrapper = container.parentElement;
+	wrapper?.style?.setProperty( '--tn-hover-bridge-self', `${ Math.round( bridgePx ) }px` );
 }
 
 function tnPositionNestedSubmenu( container, root ) {

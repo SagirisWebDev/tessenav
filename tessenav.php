@@ -61,6 +61,26 @@ function sagiriswd_tessenav_premium_status() {
 }
 
 /**
+ * Decides whether a given top-level inner block should be skipped by the free-tier gate.
+ *
+ * Centralized so both the desktop and navigator render paths apply the same rule:
+ * free-tier users render only the first 3 top-level sagiriswd/tessenav-submenu children;
+ * premium and grace-period users render all of them.
+ *
+ * @param string $block_name              The inner block's name.
+ * @param int    $top_level_submenu_count The submenu's 1-based position among top-level submenus.
+ * @param array  $premium_status          { isPremium: bool, inGracePeriod: bool, graceDaysRemaining: int }
+ * @return bool True if the block should be skipped (free-tier, beyond cap).
+ */
+function sagiriswd_tessenav_is_gated_top_level_submenu( $block_name, $top_level_submenu_count, $premium_status ) {
+	if ( 'sagiriswd/tessenav-submenu' !== $block_name ) {
+		return false;
+	}
+	$can_render_all = $premium_status['isPremium'] || $premium_status['inGracePeriod'];
+	return ! $can_render_all && $top_level_submenu_count > 3;
+}
+
+/**
  * Determines whether either the bundle or individual license is within the 30-day
  * grace period after subscription lapse. Returns the highest days-remaining value.
  *
@@ -135,6 +155,44 @@ function sagiriswd_tessenav_grace_period_admin_notice() {
 add_action( 'admin_notices', 'sagiriswd_tessenav_grace_period_admin_notice' );
 
 /**
+ * Registers the REST route used by the editor to refetch license state on focus.
+ *
+ * The editor enqueues a stale snapshot of premium status at load time; when the
+ * author activates a license in another tab and returns, this endpoint provides
+ * the fresh value so the upsell card vanishes without a full editor reload.
+ */
+function sagiriswd_tessenav_register_license_status_route() {
+	register_rest_route(
+		'tessenav/v1',
+		'/license-status',
+		array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => 'sagiriswd_tessenav_rest_license_status',
+			'permission_callback' => function () {
+				return current_user_can( 'edit_posts' );
+			},
+		)
+	);
+}
+add_action( 'rest_api_init', 'sagiriswd_tessenav_register_license_status_route' );
+
+/**
+ * REST callback that returns the current premium status snapshot.
+ *
+ * @return WP_REST_Response
+ */
+function sagiriswd_tessenav_rest_license_status() {
+	$status = sagiriswd_tessenav_premium_status();
+	return rest_ensure_response(
+		array(
+			'isPremium'          => (bool) $status['isPremium'],
+			'inGracePeriod'      => (bool) $status['inGracePeriod'],
+			'graceDaysRemaining' => (int) $status['graceDaysRemaining'],
+		)
+	);
+}
+
+/**
  * Passes premium status and upgrade URL to the block editor.
  */
 function sagiriswd_tessenav_enqueue_editor_settings() {
@@ -143,9 +201,63 @@ function sagiriswd_tessenav_enqueue_editor_settings() {
 		'sagiriswd-tessenav-editor-script',
 		'tessenavSettings',
 		array(
-			'isPremium'  => $status['isPremium'],
-			'upgradeUrl' => TESSENAV_UPGRADE_URL,
+			'isPremium'          => $status['isPremium'],
+			'inGracePeriod'      => $status['inGracePeriod'],
+			'graceDaysRemaining' => $status['graceDaysRemaining'],
+			'upgradeUrl'         => TESSENAV_UPGRADE_URL,
+			'licensePageUrl'     => add_query_arg( 'ref', 'tessenav-editor-card', menu_page_url( 'tessenav-license', false ) ),
 		)
+	);
+
+	// Toolbar fix for narrow preview viewports.
+	//
+	// In Tablet/Mobile preview the editor canvas is scaled to <600px, but the
+	// floating block toolbar still anchors above the selected block — landing
+	// on top of whatever sits above it (post title, sibling blocks, header
+	// chrome). The fix is to switch the user's `fixedToolbar` preference on
+	// while the canvas is narrow so the toolbar mounts in the editor top bar
+	// instead, then restore the previous value when the viewport widens.
+	wp_add_inline_script(
+		'wp-edit-post',
+		"( function() {
+			if ( ! window.wp || ! wp.data ) return;
+			var prefs = wp.data.dispatch( 'core/preferences' );
+			var prefsSelect = wp.data.select( 'core/preferences' );
+			if ( ! prefs || ! prefsSelect ) return;
+
+			var savedFixedToolbar = null;
+			var forcedFixed = false;
+			var threshold = 600;
+
+			function tnUpdate() {
+				var iframe = document.querySelector( 'iframe[name=\"editor-canvas\"]' );
+				if ( ! iframe ) return;
+				var rect = iframe.getBoundingClientRect();
+				var isNarrow = rect.width > 0 && rect.width < threshold;
+				if ( isNarrow && ! forcedFixed ) {
+					savedFixedToolbar = !! prefsSelect.get( 'core', 'fixedToolbar' );
+					prefs.set( 'core', 'fixedToolbar', true );
+					forcedFixed = true;
+				} else if ( ! isNarrow && forcedFixed ) {
+					prefs.set( 'core', 'fixedToolbar', savedFixedToolbar );
+					forcedFixed = false;
+				}
+			}
+
+			// Initial run + retries until the canvas iframe mounts.
+			var attempts = 0;
+			var initial = setInterval( function() {
+				attempts++;
+				if ( document.querySelector( 'iframe[name=\"editor-canvas\"]' ) || attempts > 40 ) {
+					clearInterval( initial );
+					tnUpdate();
+				}
+			}, 150 );
+
+			window.addEventListener( 'resize', tnUpdate );
+			// Catch preview-device switches (no resize event fires for those).
+			setInterval( tnUpdate, 500 );
+		} )();"
 	);
 }
 add_action( 'enqueue_block_editor_assets', 'sagiriswd_tessenav_enqueue_editor_settings' );
@@ -338,7 +450,6 @@ if ( ! function_exists( 'sagiriswd_tessenav_build_navigator_html' ) ) {
 	 * @return string HTML string.
 	 */
 	function sagiriswd_tessenav_build_navigator_html( $top_level_inner_blocks, $id_map, $premium_status ) {
-		$can_render_all        = $premium_status['isPremium'] || $premium_status['inGracePeriod'];
 		$chevron_right         = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" focusable="false"><path d="M4 1.5L8.5 6L4 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 		$top_level_count       = 0;
 		$root_content          = '';
@@ -347,7 +458,7 @@ if ( ! function_exists( 'sagiriswd_tessenav_build_navigator_html' ) ) {
 		foreach ( $top_level_inner_blocks as $block ) {
 			if ( 'sagiriswd/tessenav-submenu' === $block->name ) {
 				$top_level_count++;
-				if ( ! $can_render_all && $top_level_count > 3 ) {
+				if ( sagiriswd_tessenav_is_gated_top_level_submenu( $block->name, $top_level_count, $premium_status ) ) {
 					continue;
 				}
 				$screen_id              = $id_map[ spl_object_id( $block ) ] ?? '';

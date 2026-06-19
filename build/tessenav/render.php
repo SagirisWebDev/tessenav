@@ -232,7 +232,11 @@ if ( ! function_exists( 'sagiriswd_tessenav_get_styles') ) {
 }
 
 if ( ! function_exists( 'sagiriswd_tessenav_get_inner_blocks_html') ) {
-	function sagiriswd_tessenav_get_inner_blocks_html( $attributes, $block ) {
+	function sagiriswd_tessenav_get_inner_blocks_html( $attributes, $block, $premium_status = null ) {
+		if ( null === $premium_status ) {
+			$premium_status = sagiriswd_tessenav_premium_status();
+		}
+
 		$has_submenus   = sagiriswd_tessenav_has_submenus( $block );
 		$is_interactive = sagiriswd_tessenav_is_interactive( $attributes, $block );
 
@@ -246,8 +250,15 @@ if ( ! function_exists( 'sagiriswd_tessenav_get_inner_blocks_html') ) {
 		);
 
 		$inner_blocks_html = '';
+		$top_level_submenu_count = 0;
 
 		foreach ( $block->inner_blocks as $inner_block ) {
+			if ( 'sagiriswd/tessenav-submenu' === $inner_block->name ) {
+				$top_level_submenu_count++;
+				if ( sagiriswd_tessenav_is_gated_top_level_submenu( $inner_block->name, $top_level_submenu_count, $premium_status ) ) {
+					continue;
+				}
+			}
 			$inner_block_markup = $inner_block->render();
 
 			$inner_blocks_html .= $inner_block_markup;
@@ -545,7 +556,7 @@ if ( ! function_exists( 'sagiriswd_tessenav_get_navigator_markup' ) ) {
 		$overlay_inline_styles = esc_attr( safecss_filter_attr( $colors['overlay_inline_styles'] ) );
 
 		// Desktop view: normal inner-blocks container with hover/click submenu behaviour.
-		$inner_blocks_html = sagiriswd_tessenav_get_inner_blocks_html( $attributes, $block );
+		$inner_blocks_html = sagiriswd_tessenav_get_inner_blocks_html( $attributes, $block, $premium_status );
 
 		// Mobile overlay view: Navigator screens.
 		$index  = 0;
@@ -617,20 +628,24 @@ if ( ! function_exists( 'sagiriswd_tessenav_get_wrapper_markup') ) {
  * have been deprecated in favor of
  * customTextColor and customBackgroundColor ones.
  * Move the values from old attrs to the new ones.
+ *
+ * The isset() guard makes this file safe to require_once from tests, which load
+ * the function definitions without invoking the block render pipeline.
  */
-if ( isset( $attributes['rgbTextColor'] ) && empty( $attributes['textColor'] ) ) {
-	$attributes['customTextColor'] = $attributes['rgbTextColor'];
+if ( isset( $attributes, $block ) ) {
+	if ( isset( $attributes['rgbTextColor'] ) && empty( $attributes['textColor'] ) ) {
+		$attributes['customTextColor'] = $attributes['rgbTextColor'];
+	}
+
+	if ( isset( $attributes['rgbBackgroundColor'] ) && empty( $attributes['backgroundColor'] ) ) {
+		$attributes['customBackgroundColor'] = $attributes['rgbBackgroundColor'];
+	}
+
+	unset( $attributes['rgbTextColor'], $attributes['rgbBackgroundColor'] );
+
+	echo sprintf(
+		'<nav %1$s>%2$s</nav>',
+		sagiriswd_tessenav_get_nav_wrapper_attributes( $attributes, $block ),
+		sagiriswd_tessenav_get_wrapper_markup( $attributes, $block )
+	);
 }
-
-if ( isset( $attributes['rgbBackgroundColor'] ) && empty( $attributes['backgroundColor'] ) ) {
-	$attributes['customBackgroundColor'] = $attributes['rgbBackgroundColor'];
-}
-
-
-unset( $attributes['rgbTextColor'], $attributes['rgbBackgroundColor'] );
-
-echo sprintf(
-	'<nav %1$s>%2$s</nav>',
-	sagiriswd_tessenav_get_nav_wrapper_attributes( $attributes, $block ),
-	sagiriswd_tessenav_get_wrapper_markup( $attributes, $block )
-);

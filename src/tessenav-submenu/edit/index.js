@@ -502,7 +502,6 @@ export default function Edit( {
 			} }>
 				<div>{ __('Set the width of the menu on desktop and laptops') }</div>
 				<div>{ __('Minimum: 200px') }<br />{ __('Maximum: 1920px') }</div>
-				{<div><strong>{ __('The width of all menus on mobile devices is 200px') }</strong></div>}
 				<ToolsPanelItem
 					hasValue={ () => menuMaxWidth !== undefined }
 					label={ __( 'Width' ) }

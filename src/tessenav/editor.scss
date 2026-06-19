@@ -272,6 +272,52 @@
  * source order breaks the tie in our favor. The properties mirror what
  * `submenu/editor.scss` applies on `.is-selected` so the visual matches the
  * selection-driven reveal that's already working. */
+/* ─── Free-tier upsell card + dim treatment for gated submenus ────────────────
+ *
+ * The card is injected by editor.BlockListBlock filter (upsell-card-filter.js)
+ * before the 4th top-level submenu inside a sagiriswd/tessenav block. Dim
+ * treatment uses the `is-tn-gated` className that the same filter merges onto
+ * the gated submenus' BlockListBlock props. Both are editor-only — the live
+ * frontend never renders them (PHP gate drops gated submenus entirely). */
+
+.sagiriswd-tn__upsell-card {
+  /* Sits between blocks 3 and 4 inside the navigation block list. Match the
+   * surrounding block-list spacing so the card reads as a structural element,
+   * not a floating notice. */
+  margin: 12px 0;
+  max-width: 340px;
+}
+
+.sagiriswd-tn__upsell-card-mark {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.sagiriswd-tn__upsell-card-body {
+  margin: 0;
+  color: #1e1e1e;
+}
+
+/* Dim gated submenus. Opacity transitions smoothly when the author crosses the
+ * gate boundary (e.g. deletes/adds a submenu). `:hover`/`:focus-within` lift
+ * the dim so the author can edit gated content without fighting the gray. */
+.wp-block-sagiriswd-tessenav-submenu.is-tn-gated {
+  opacity: 0.35;
+  transition: opacity 150ms linear;
+
+  &:hover,
+  &:focus-within {
+    opacity: 1;
+  }
+}
+
 .sagiriswd-tn .wp-block-sagiriswd-tessenav-submenu:not(.open-on-click):hover > .sagiriswd-tn__submenu-container {
   /* `display: flex !important` overrides the `:empty { display: none }`
    * rule in `style.scss:42` for Submenu blocks with no children yet.

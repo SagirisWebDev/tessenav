@@ -21,8 +21,13 @@ import save from './save';
 import deprecated from './deprecated';
 import metadata from './block.json';
 import icon from './icon';
+import { installLicenseStatusStore } from './license-status-store';
+import { registerUpsellCardFilter } from './upsell-card-filter';
 import './style.scss';
 import './editor.scss';
+
+installLicenseStatusStore();
+registerUpsellCardFilter();
 
 /**
  * Every block starts by registering a new block type definition.

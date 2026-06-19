@@ -15,7 +15,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -24,7 +24,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -33,7 +33,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -42,7 +42,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -51,7 +51,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -60,7 +60,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -69,7 +69,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -78,7 +78,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -87,7 +87,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -96,7 +96,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -105,7 +105,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -114,7 +114,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -123,7 +123,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -132,7 +132,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -141,7 +141,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -150,7 +150,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -159,7 +159,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -168,7 +168,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -177,7 +177,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -186,7 +186,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"
@@ -195,7 +195,7 @@ export default function icon() {
 		<Path
 			fill-rule="evenodd"
 			class="a"
-			stroke="#000"
+			stroke="currentColor"
 			stroke-linecap="round"
 			stroke-linejoin="round"
 			stroke-width="2"

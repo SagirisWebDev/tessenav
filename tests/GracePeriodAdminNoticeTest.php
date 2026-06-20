@@ -13,6 +13,10 @@ class GracePeriodAdminNoticeTest extends WP_UnitTestCase {
 		parent::set_up();
 		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $admin );
+		// Notices are scoped to relevant admin screens (Rule 11 compliance).
+		// Tests pin the dashboard screen so they exercise the OTHER conditions
+		// rather than the screen-scoping branch.
+		set_current_screen( 'dashboard' );
 	}
 
 	public function tear_down(): void {
@@ -86,12 +90,12 @@ class GracePeriodAdminNoticeTest extends WP_UnitTestCase {
 	public function test_notice_shown_during_grace_period(): void {
 		update_option( 'sagiriswd_tessenav_license_status', array(
 			'valid'  => false,
-			'expiry' => time(),
+			'expiry' => time() - HOUR_IN_SECONDS,
 		) );
 
 		$output = $this->capture_notice();
 
-		$this->assertStringContainsString( 'notice-error', $output );
+		$this->assertStringContainsString( 'notice-warning', $output );
 		$this->assertStringContainsString( 'grace period', $output );
 		$this->assertStringContainsString( TESSENAV_UPGRADE_URL, $output );
 	}
@@ -123,15 +127,15 @@ class GracePeriodAdminNoticeTest extends WP_UnitTestCase {
 		$this->assertStringNotContainsString( '1 days', $output );
 	}
 
-	// ── Notice is not dismissible ─────────────────────────────────────────────
+	// ── Notice is dismissible (Rule 11 compliance) ───────────────────────────
 
-	public function test_notice_is_not_dismissible(): void {
+	public function test_notice_is_dismissible(): void {
 		update_option( 'sagiriswd_tessenav_license_status', array(
 			'valid'  => false,
-			'expiry' => time(),
+			'expiry' => time() - HOUR_IN_SECONDS,
 		) );
 
-		$this->assertStringNotContainsString( 'is-dismissible', $this->capture_notice() );
+		$this->assertStringContainsString( 'is-dismissible', $this->capture_notice() );
 	}
 
 	// ── Non-admin users do not see the notice ────────────────────────────────
@@ -158,7 +162,30 @@ class GracePeriodAdminNoticeTest extends WP_UnitTestCase {
 
 		$output = $this->capture_notice();
 
-		$this->assertStringContainsString( 'notice-error', $output );
+		$this->assertStringContainsString( 'notice-warning', $output );
 		$this->assertStringContainsString( 'grace period', $output );
+	}
+
+	// ── Screen scoping (Rule 11) ─────────────────────────────────────────────
+
+	public function test_notice_suppressed_on_unrelated_admin_screen(): void {
+		update_option( 'sagiriswd_tessenav_license_status', array(
+			'valid'  => false,
+			'expiry' => time() - HOUR_IN_SECONDS,
+		) );
+		// Unrelated screen — notice must not fire even though grace is active.
+		set_current_screen( 'edit-post' );
+
+		$this->assertEmpty( $this->capture_notice() );
+	}
+
+	public function test_notice_fires_on_plugins_screen(): void {
+		update_option( 'sagiriswd_tessenav_license_status', array(
+			'valid'  => false,
+			'expiry' => time() - HOUR_IN_SECONDS,
+		) );
+		set_current_screen( 'plugins' );
+
+		$this->assertStringContainsString( 'grace period', $this->capture_notice() );
 	}
 }

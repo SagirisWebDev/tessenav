@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       TesseNav
- * Description:       Add text, media, layout, design and theme blocks to the Navigation block.
+ * Description:       Build navigation with rich submenus — text, media, columns, and any layout block inside the WordPress Navigation block.
  * Version:           0.1.0
  * Requires at least: 6.7
  * Requires PHP:      7.4
@@ -9,7 +9,6 @@
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       tessenav
- * Domain Path:       sagiriswd
  *
  * @package Sagiriswd
  */
@@ -118,10 +117,44 @@ function sagiriswd_tessenav_resolve_grace_period( $bundle_status, $individual_st
 }
 
 /**
- * Renders a persistent admin notice during the grace period after premium deactivation.
+ * True when the current admin screen is one where TesseNav notices belong:
+ * the Dashboard, Plugins page, or the TesseNav license page itself.
+ *
+ * Scoping notices to these screens (rather than firing on every wp-admin page)
+ * satisfies WP.org Plugin Guideline 11's "limited in scope, used sparingly" rule.
+ *
+ * @return bool
+ */
+function sagiriswd_tessenav_is_relevant_admin_screen() {
+	if ( ! function_exists( 'get_current_screen' ) ) {
+		return false;
+	}
+	$screen = get_current_screen();
+	if ( ! $screen ) {
+		return false;
+	}
+	$relevant_ids = array( 'dashboard', 'plugins' );
+	if ( in_array( $screen->id, $relevant_ids, true ) ) {
+		return true;
+	}
+	// The TesseNav license page lands as either a Sagiris-menu submenu screen
+	// or an options screen depending on whether the parent menu is registered.
+	return false !== strpos( $screen->id, 'tessenav-license' );
+}
+
+/**
+ * Renders an admin notice during the grace period after premium deactivation.
+ *
+ * Compliance: dismissible (per pageview), scoped to relevant screens only, and
+ * downgraded from notice-error to notice-warning. The condition self-resolves
+ * when the user renews their license or the grace period ends.
  */
 function sagiriswd_tessenav_grace_period_admin_notice() {
 	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	if ( ! sagiriswd_tessenav_is_relevant_admin_screen() ) {
 		return;
 	}
 
@@ -140,7 +173,7 @@ function sagiriswd_tessenav_grace_period_admin_notice() {
 	$upgrade_url = esc_url( TESSENAV_UPGRADE_URL );
 
 	printf(
-		'<div class="notice notice-error"><p>%s</p></div>',
+		'<div class="notice notice-warning is-dismissible"><p>%s</p></div>',
 		wp_kses(
 			sprintf(
 				/* translators: 1: days remaining string, 2: upgrade URL */
@@ -327,6 +360,10 @@ function sagiriswd_tessenav_individual_key_notice() {
 		return;
 	}
 
+	if ( ! sagiriswd_tessenav_is_relevant_admin_screen() ) {
+		return;
+	}
+
 	$bundle_status = get_option( 'sagiriswd_bundle_license_status', array( 'valid' => false ) );
 	if ( empty( $bundle_status['valid'] ) ) {
 		return;
@@ -336,10 +373,19 @@ function sagiriswd_tessenav_individual_key_notice() {
 		return;
 	}
 
-	$manage_url = admin_url( 'admin.php?page=tessenav-license' );
+	// menu_page_url() auto-resolves to whichever parent (Sagiris-menu submenu OR
+	// Settings options-page) the license page is registered under, so this link
+	// stays correct whether the bundle plugin is present or TesseNav is standalone.
+	// Falls back to the conditional pattern if admin_menu hasn't fired yet.
+	$manage_url = menu_page_url( 'tessenav-license', false );
+	if ( ! $manage_url ) {
+		$manage_url = sagiriswd_tessenav_sagiris_menu_exists()
+			? admin_url( 'admin.php?page=tessenav-license' )
+			: admin_url( 'options-general.php?page=tessenav-license' );
+	}
 
 	printf(
-		'<div class="notice notice-info"><p>%s</p></div>',
+		'<div class="notice notice-info is-dismissible"><p>%s</p></div>',
 		wp_kses(
 			sprintf(
 				/* translators: %s: URL to TesseNav license settings */

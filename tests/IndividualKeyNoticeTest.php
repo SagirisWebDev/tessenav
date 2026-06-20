@@ -14,6 +14,10 @@ class IndividualKeyNoticeTest extends WP_UnitTestCase {
 		parent::set_up();
 		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $admin );
+		// Notices are scoped to relevant admin screens (Rule 11 compliance).
+		// Tests pin the dashboard screen so they exercise the OTHER conditions
+		// rather than the screen-scoping branch.
+		set_current_screen( 'dashboard' );
 	}
 
 	public function tear_down(): void {
@@ -78,11 +82,11 @@ class IndividualKeyNoticeTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'notice-info', $this->capture_notice() );
 	}
 
-	public function test_notice_is_not_dismissible(): void {
+	public function test_notice_is_dismissible(): void {
 		update_option( 'sagiriswd_bundle_license_status', array( 'valid' => true, 'expiry' => null ) );
 		update_option( 'sagiriswd_tessenav_license_key', 'XXXX-XXXX-XXXX-XXXX' );
 
-		$this->assertStringNotContainsString( 'is-dismissible', $this->capture_notice() );
+		$this->assertStringContainsString( 'is-dismissible', $this->capture_notice() );
 	}
 
 	public function test_notice_mentions_billing(): void {

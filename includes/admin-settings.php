@@ -90,9 +90,7 @@ function sagiriswd_tessenav_handle_settings_save() {
 		return;
 	}
 
-	$redirect_base = sagiriswd_tessenav_sagiris_menu_exists()
-		? admin_url( 'admin.php?page=tessenav-license' )
-		: admin_url( 'options-general.php?page=tessenav-license' );
+	$redirect_base = menu_page_url( 'tessenav-license', false );
 
 	wp_safe_redirect( add_query_arg( 'tessenav_msg', $query_arg, $redirect_base ) );
 	exit;

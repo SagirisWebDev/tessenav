@@ -351,6 +351,19 @@ $navigation-icon-size: 24px;
 	}
 }
 
+// Force label + chevron inline on the submenu wrapper.
+//
+// The submenu block.json declares `layout: { type: flex, orientation: vertical }`
+// to govern how INNER blocks (dropdown content) stack vertically. Gutenberg
+// applies that same flex-direction to the BLOCK WRAPPER too via an
+// auto-generated `.wp-container-…-is-layout-…` class, which makes the label
+// anchor and the chevron toggle stack on top of each other on the horizontal
+// nav. The 0-2-0 specificity here beats Gutenberg's 0-1-0 container rule.
+.sagiriswd-tn .sagiriswd-tn-submenu.wp-block-sagiriswd-tessenav-submenu {
+	flex-direction: row;
+	align-items: center;
+}
+
 button.sagiriswd-tn-item__content {
 	background-color: transparent;
 	border: none;

@@ -1,0 +1,45 @@
+# .distignore — paths excluded from the WP.org submission zip.
+# Used by `npm run plugin-zip` (@wordpress/scripts) to produce a clean release.
+
+# Source (uncompiled). Only build/ ships.
+/src
+
+# Tests & test infrastructure.
+/tests
+/bin
+/phpunit.xml.dist
+/phpunit.xml
+.phpunit.result.cache
+
+# Internal docs (ADRs, QA fixtures, design notes).
+/docs
+
+# Dev dependencies & lockfiles.
+/node_modules
+/vendor
+package.json
+package-lock.json
+composer.json
+composer.lock
+
+# Tooling state.
+/.git
+/.github
+.gitignore
+.gitattributes
+.distignore
+.editorconfig
+.eslintrc
+.prettierrc
+.babelrc
+webpack.config.js
+
+# Captured screenshots / playwright artifacts (not in git anyway).
+/.playwright-mcp
+*.png
+*.jpg
+*.jpeg
+
+# OS junk.
+.DS_Store
+Thumbs.db

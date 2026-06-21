@@ -264,7 +264,7 @@ if ( ! function_exists( 'sagiriswd_tessenav_submenu_render_submenu_icon') ) {
 		) {
 			$style_attribute .= sprintf( 'width:%s;', $attributes['menuMaxWidth'] );
 		}
-		
+
 		$inner_blocks_html = '';
 		foreach ( $inner_blocks as $inner_block ) {
 			$inner_blocks_html .= $inner_block->render();

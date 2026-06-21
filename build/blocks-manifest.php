@@ -162,6 +162,18 @@ return array(
 				'sticky' => true
 			),
 			'shadow' => true,
+			'__experimentalBorder' => array(
+				'color' => true,
+				'radius' => true,
+				'style' => true,
+				'width' => true,
+				'__experimentalDefaultControls' => array(
+					'color' => true,
+					'radius' => true,
+					'style' => true,
+					'width' => true
+				)
+			),
 			'interactivity' => true,
 			'renaming' => false,
 			'contentRole' => true
@@ -313,6 +325,18 @@ return array(
 				'blockGap' => true
 			),
 			'shadow' => true,
+			'__experimentalBorder' => array(
+				'color' => true,
+				'radius' => true,
+				'style' => true,
+				'width' => true,
+				'__experimentalDefaultControls' => array(
+					'color' => true,
+					'radius' => true,
+					'style' => true,
+					'width' => true
+				)
+			),
 			'interactivity' => array(
 				'clientNavigation' => true
 			)

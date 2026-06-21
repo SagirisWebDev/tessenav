@@ -10,9 +10,15 @@
 /phpunit.xml.dist
 /phpunit.xml
 .phpunit.result.cache
+jest.config.js
+playwright.config.js
+/test-results
 
-# Internal docs (ADRs, QA fixtures, design notes).
+# Internal docs (ADRs, QA fixtures, design notes) and agent context files.
 /docs
+CLAUDE.md
+CONTEXT.md
+/.swd-harness
 
 # Dev dependencies & lockfiles.
 /node_modules
@@ -39,6 +45,10 @@ webpack.config.js
 *.png
 *.jpg
 *.jpeg
+
+# Build & release zip artifacts (must not appear inside the release zip itself).
+*.zip
+/Sites
 
 # OS junk.
 .DS_Store

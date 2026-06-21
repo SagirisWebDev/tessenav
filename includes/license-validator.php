@@ -45,13 +45,20 @@ function sagiriswd_tessenav_activate_license( $license_key ) {
 		$expiry = strtotime( $expires_at );
 	}
 
+	$variant_id = isset( $body['meta']['variant_id'] ) ? (int) $body['meta']['variant_id'] : 0;
+	$tier       = function_exists( 'sagiriswd_tessenav_tier_for_variant_id' )
+		? sagiriswd_tessenav_tier_for_variant_id( $variant_id )
+		: null;
+
 	update_option( 'sagiriswd_tessenav_license_key', $license_key, false );
 	update_option( 'sagiriswd_tessenav_license_instance_id', $body['instance']['id'], false );
 	update_option(
 		'sagiriswd_tessenav_license_status',
 		array(
-			'valid'  => true,
-			'expiry' => $expiry,
+			'valid'      => true,
+			'expiry'     => $expiry,
+			'variant_id' => $variant_id ?: null,
+			'tier'       => $tier,
 		),
 		false
 	);
@@ -94,11 +101,23 @@ function sagiriswd_tessenav_validate_license() {
 		$expiry = strtotime( $expires_at );
 	}
 
+	// Preserve tier from initial activation. The validate endpoint doesn't
+	// always echo meta.variant_id back, so fall back to whatever was stored.
+	$prev       = get_option( 'sagiriswd_tessenav_license_status', array() );
+	$variant_id = isset( $body['meta']['variant_id'] )
+		? (int) $body['meta']['variant_id']
+		: ( $prev['variant_id'] ?? null );
+	$tier       = function_exists( 'sagiriswd_tessenav_tier_for_variant_id' ) && $variant_id
+		? sagiriswd_tessenav_tier_for_variant_id( $variant_id )
+		: ( $prev['tier'] ?? null );
+
 	update_option(
 		'sagiriswd_tessenav_license_status',
 		array(
-			'valid'  => $valid,
-			'expiry' => $expiry,
+			'valid'      => $valid,
+			'expiry'     => $expiry,
+			'variant_id' => $variant_id,
+			'tier'       => $tier,
 		),
 		false
 	);

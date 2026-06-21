@@ -5,7 +5,7 @@
  * Version:           0.1.0
  * Requires at least: 6.7
  * Requires PHP:      7.4
- * Author:            Tiegan Benson
+ * Author:            Sagiris Web Development
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       tessenav
@@ -18,10 +18,94 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'TESSENAV_GRACE_PERIOD_DAYS', 30 );
-define( 'TESSENAV_UPGRADE_URL', 'https://sagiriswd.lemonsqueezy.com/checkout/buy/1804446' );
+
+// Lemon Squeezy store + variant IDs for TesseNav Premium. Variant IDs are the
+// durable identifiers for each pricing tier in LS — keep in sync with the
+// variants configured in the dashboard (product ID 1153171).
+define( 'TESSENAV_LS_STORE_SLUG', 'sagiriswd' );
+define( 'TESSENAV_LS_PRODUCT_ID', 1153171 );
+define( 'TESSENAV_LS_VARIANT_SINGLE_SITE', 1820866 );
+define( 'TESSENAV_LS_VARIANT_UNLIMITED',   1804446 );
+define( 'TESSENAV_LS_VARIANT_LIFETIME',    1820856 );
+
+// Default upgrade target — the unlimited annual tier (best value for the
+// typical buyer hitting the 4th-submenu gate). The per-tier map is exposed to
+// JS via tessenavSettings.checkoutUrls.
+define(
+	'TESSENAV_UPGRADE_URL',
+	sprintf(
+		'https://%s.lemonsqueezy.com/checkout/buy/%d',
+		TESSENAV_LS_STORE_SLUG,
+		TESSENAV_LS_VARIANT_UNLIMITED
+	)
+);
 
 require_once __DIR__ . '/includes/license-validator.php';
 require_once __DIR__ . '/includes/admin-settings.php';
+
+/**
+ * Returns the LS checkout URL for a given TesseNav Premium tier.
+ *
+ * @param string $tier One of 'single_site' | 'unlimited' | 'lifetime'.
+ * @return string Checkout URL, or empty string if the tier is unknown.
+ */
+function sagiriswd_tessenav_checkout_url( $tier ) {
+	$variant_id = sagiriswd_tessenav_variant_id_for_tier( $tier );
+	if ( ! $variant_id ) {
+		return '';
+	}
+	return sprintf(
+		'https://%s.lemonsqueezy.com/checkout/buy/%d',
+		TESSENAV_LS_STORE_SLUG,
+		$variant_id
+	);
+}
+
+/**
+ * Returns the full per-tier checkout URL map. Surfaced to JS for the upsell
+ * card so it can build per-tier CTAs without round-tripping to PHP.
+ *
+ * @return array<string,string>
+ */
+function sagiriswd_tessenav_checkout_urls() {
+	return array(
+		'single_site' => sagiriswd_tessenav_checkout_url( 'single_site' ),
+		'unlimited'   => sagiriswd_tessenav_checkout_url( 'unlimited' ),
+		'lifetime'    => sagiriswd_tessenav_checkout_url( 'lifetime' ),
+	);
+}
+
+/**
+ * Maps tier slug → variant ID.
+ *
+ * @param string $tier
+ * @return int|null
+ */
+function sagiriswd_tessenav_variant_id_for_tier( $tier ) {
+	$map = array(
+		'single_site' => TESSENAV_LS_VARIANT_SINGLE_SITE,
+		'unlimited'   => TESSENAV_LS_VARIANT_UNLIMITED,
+		'lifetime'    => TESSENAV_LS_VARIANT_LIFETIME,
+	);
+	return $map[ $tier ] ?? null;
+}
+
+/**
+ * Reverse lookup — variant ID → tier slug. Used when LS returns
+ * meta.variant_id on activation so we can stamp the stored license with its
+ * tier.
+ *
+ * @param int $variant_id LS variant numeric ID.
+ * @return string|null 'single_site' | 'unlimited' | 'lifetime' | null.
+ */
+function sagiriswd_tessenav_tier_for_variant_id( $variant_id ) {
+	$map = array(
+		TESSENAV_LS_VARIANT_SINGLE_SITE => 'single_site',
+		TESSENAV_LS_VARIANT_UNLIMITED   => 'unlimited',
+		TESSENAV_LS_VARIANT_LIFETIME    => 'lifetime',
+	);
+	return $map[ (int) $variant_id ] ?? null;
+}
 
 /**
  * Returns the current premium status for TesseNav.
@@ -238,6 +322,7 @@ function sagiriswd_tessenav_enqueue_editor_settings() {
 			'inGracePeriod'      => $status['inGracePeriod'],
 			'graceDaysRemaining' => $status['graceDaysRemaining'],
 			'upgradeUrl'         => TESSENAV_UPGRADE_URL,
+			'checkoutUrls'       => sagiriswd_tessenav_checkout_urls(),
 			'licensePageUrl'     => add_query_arg( 'ref', 'tessenav-editor-card', menu_page_url( 'tessenav-license', false ) ),
 		)
 	);

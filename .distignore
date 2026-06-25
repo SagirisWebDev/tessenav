@@ -1,5 +1,5 @@
-# .distignore — paths excluded from the WP.org submission zip.
-# Used by `npm run plugin-zip` (@wordpress/scripts) to produce a clean release.
+# .distignore — paths excluded from the production zip.
+# Used by `npm run plugin-zip` (sagiris-plugin-zip global script via rsync).
 
 # Source (uncompiled). Only build/ ships.
 /src
@@ -19,6 +19,7 @@ playwright.config.js
 CLAUDE.md
 CONTEXT.md
 /.swd-harness
+/.claude
 
 # Dev dependencies & lockfiles.
 /node_modules

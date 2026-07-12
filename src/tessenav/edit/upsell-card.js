@@ -33,14 +33,14 @@ export default function UpsellCard( { gatedCount } ) {
 	const upgradeHref = appendQuery( settings.upgradeUrl, UTM_QUERY );
 	const licenseHref = settings.licensePageUrl || '#';
 
-	const headline = __( 'Unlock more submenus', 'tessenav' );
+	const headline = __( 'Unlock more submenus', 'tessenav-rich-submenus' );
 	const body = sprintf(
 		/* translators: %d: number of submenus hidden on the live site */
 		_n(
 			'Your TesseNav free plan shows the first 3 submenus. Upgrade to display all %d.',
 			'Your TesseNav free plan shows the first 3 submenus. Upgrade to display all %d.',
 			3 + gatedCount,
-			'tessenav'
+			'tessenav-rich-submenus'
 		),
 		3 + gatedCount
 	);
@@ -52,7 +52,7 @@ export default function UpsellCard( { gatedCount } ) {
 			role="region"
 			aria-label={ __(
 				'TesseNav free-plan limit reached',
-				'tessenav'
+				'tessenav-rich-submenus'
 			) }
 		>
 			<Card size="small">
@@ -83,13 +83,13 @@ export default function UpsellCard( { gatedCount } ) {
 							>
 								{ __(
 									'Upgrade to TesseNav Premium',
-									'tessenav'
+									'tessenav-rich-submenus'
 								) }
 							</Button>
 							<ExternalLink href={ licenseHref }>
 								{ __(
 									'Already have a key?',
-									'tessenav'
+									'tessenav-rich-submenus'
 								) }
 							</ExternalLink>
 						</VStack>

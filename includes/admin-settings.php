@@ -20,16 +20,16 @@ function sagiriswd_tessenav_register_admin_menu() {
 	if ( sagiriswd_tessenav_sagiris_menu_exists() ) {
 		add_submenu_page(
 			'sagiris-premium-blocks',
-			__( 'TesseNav License', 'tessenav' ),
-			__( 'TesseNav', 'tessenav' ),
+			__( 'TesseNav License', 'tessenav-rich-submenus' ),
+			__( 'TesseNav', 'tessenav-rich-submenus' ),
 			'manage_options',
 			'tessenav-license',
 			'sagiriswd_tessenav_render_license_page'
 		);
 	} else {
 		add_options_page(
-			__( 'TesseNav License', 'tessenav' ),
-			__( 'TesseNav', 'tessenav' ),
+			__( 'TesseNav License', 'tessenav-rich-submenus' ),
+			__( 'TesseNav', 'tessenav-rich-submenus' ),
 			'manage_options',
 			'tessenav-license',
 			'sagiriswd_tessenav_render_license_page'
@@ -65,11 +65,11 @@ function sagiriswd_tessenav_handle_settings_save() {
 	}
 
 	if ( ! wp_verify_nonce( sanitize_key( $_POST['sagiriswd_tessenav_nonce'] ), 'sagiriswd_tessenav_settings' ) ) {
-		wp_die( esc_html__( 'Security check failed.', 'tessenav' ) );
+		wp_die( esc_html__( 'Security check failed.', 'tessenav-rich-submenus' ) );
 	}
 
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( esc_html__( 'Insufficient permissions.', 'tessenav' ) );
+		wp_die( esc_html__( 'Insufficient permissions.', 'tessenav-rich-submenus' ) );
 	}
 
 	$sagiris_action = isset( $_POST['sagiris_action'] ) ? sanitize_text_field( wp_unslash( $_POST['sagiris_action'] ) ) : '';
@@ -110,29 +110,29 @@ function sagiriswd_tessenav_render_license_page() {
 	$msg         = isset( $_GET['tessenav_msg'] ) ? sanitize_key( $_GET['tessenav_msg'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	?>
 	<div class="wrap">
-		<h1><?php esc_html_e( 'TesseNav — Individual License', 'tessenav' ); ?></h1>
+		<h1><?php esc_html_e( 'TesseNav — Individual License', 'tessenav-rich-submenus' ); ?></h1>
 
 		<?php if ( 'activated' === $msg ) : ?>
-			<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'License activated successfully.', 'tessenav' ); ?></p></div>
+			<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'License activated successfully.', 'tessenav-rich-submenus' ); ?></p></div>
 		<?php elseif ( 'activation_failed' === $msg ) : ?>
-			<div class="notice notice-error is-dismissible"><p><?php esc_html_e( 'License activation failed. Check your key and try again.', 'tessenav' ); ?></p></div>
+			<div class="notice notice-error is-dismissible"><p><?php esc_html_e( 'License activation failed. Check your key and try again.', 'tessenav-rich-submenus' ); ?></p></div>
 		<?php elseif ( 'deactivated' === $msg ) : ?>
-			<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'License key removed. Premium access ended immediately.', 'tessenav' ); ?></p></div>
+			<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'License key removed. Premium access ended immediately.', 'tessenav-rich-submenus' ); ?></p></div>
 		<?php elseif ( 'empty_key' === $msg ) : ?>
-			<div class="notice notice-error is-dismissible"><p><?php esc_html_e( 'Please enter a license key.', 'tessenav' ); ?></p></div>
+			<div class="notice notice-error is-dismissible"><p><?php esc_html_e( 'Please enter a license key.', 'tessenav-rich-submenus' ); ?></p></div>
 		<?php endif; ?>
 
 		<?php if ( $license_key ) : ?>
 			<p>
-				<strong><?php esc_html_e( 'Status:', 'tessenav' ); ?></strong>
+				<strong><?php esc_html_e( 'Status:', 'tessenav-rich-submenus' ); ?></strong>
 				<?php if ( ! empty( $status['valid'] ) ) : ?>
-					<span style="color:green"><?php esc_html_e( 'Active', 'tessenav' ); ?></span>
+					<span style="color:green"><?php esc_html_e( 'Active', 'tessenav-rich-submenus' ); ?></span>
 				<?php else : ?>
-					<span style="color:red"><?php esc_html_e( 'Inactive', 'tessenav' ); ?></span>
+					<span style="color:red"><?php esc_html_e( 'Inactive', 'tessenav-rich-submenus' ); ?></span>
 				<?php endif; ?>
 			</p>
 			<p>
-				<strong><?php esc_html_e( 'Key:', 'tessenav' ); ?></strong>
+				<strong><?php esc_html_e( 'Key:', 'tessenav-rich-submenus' ); ?></strong>
 				<?php
 				$visible = substr( $license_key, 0, 8 );
 				$masked  = str_repeat( '*', max( 0, strlen( $license_key ) - 8 ) );
@@ -144,7 +144,7 @@ function sagiriswd_tessenav_render_license_page() {
 				<input type="hidden" name="action" value="sagiriswd_tessenav_settings">
 				<input type="hidden" name="sagiris_action" value="deactivate">
 				<button type="submit" class="button button-secondary">
-					<?php esc_html_e( 'Remove License Key', 'tessenav' ); ?>
+					<?php esc_html_e( 'Remove License Key', 'tessenav-rich-submenus' ); ?>
 				</button>
 			</form>
 		<?php else : ?>
@@ -156,7 +156,7 @@ function sagiriswd_tessenav_render_license_page() {
 					<tr>
 						<th scope="row">
 							<label for="tessenav_license_key">
-								<?php esc_html_e( 'TesseNav License Key', 'tessenav' ); ?>
+								<?php esc_html_e( 'TesseNav License Key', 'tessenav-rich-submenus' ); ?>
 							</label>
 						</th>
 						<td>
@@ -168,12 +168,12 @@ function sagiriswd_tessenav_render_license_page() {
 								placeholder="XXXX-XXXX-XXXX-XXXX"
 							>
 							<p class="description">
-								<?php esc_html_e( 'Activates TesseNav premium features on this site.', 'tessenav' ); ?>
+								<?php esc_html_e( 'Activates TesseNav premium features on this site.', 'tessenav-rich-submenus' ); ?>
 							</p>
 						</td>
 					</tr>
 				</table>
-				<?php submit_button( __( 'Activate License', 'tessenav' ) ); ?>
+				<?php submit_button( __( 'Activate License', 'tessenav-rich-submenus' ) ); ?>
 			</form>
 		<?php endif; ?>
 	</div>

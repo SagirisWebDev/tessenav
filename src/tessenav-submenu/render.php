@@ -9,6 +9,11 @@
  *
  * @see https://github.com/WordPress/gutenberg/blob/trunk/docs/reference-guides/block-api/block-metadata.md#render
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 if ( ! function_exists( 'sagiriswd_tessenav_submenu_build_css_font_sizes') ) {
 	function sagiriswd_tessenav_submenu_build_css_font_sizes( $context ) {
 		// CSS classes.
@@ -133,7 +138,7 @@ if ( ! function_exists( 'sagiriswd_tessenav_submenu_render_submenu_icon') ) {
 
 	$aria_label = sprintf(
 		/* translators: Accessibility text. %s: Parent page title. */
-		__( '%s submenu' ),
+		__( '%s submenu', 'tessenav-rich-submenus' ),
 		wp_strip_all_tags( $label )
 	);
 
@@ -293,4 +298,4 @@ if ( ! function_exists( 'sagiriswd_tessenav_submenu_render_submenu_icon') ) {
 	}
 
 	$html .= '</div>';
-	echo $html;
+	echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $html is composed of trusted, individually-escaped fragments (wp_kses, get_block_wrapper_attributes, and core-derived URLs).

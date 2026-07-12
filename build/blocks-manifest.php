@@ -178,7 +178,7 @@ return array(
 			'renaming' => false,
 			'contentRole' => true
 		),
-		'textdomain' => 'sagiriswd',
+		'textdomain' => 'tessenav-rich-submenus',
 		'editorScript' => 'file:./index.js',
 		'editorStyle' => 'file:./index.css',
 		'style' => 'file:./style-index.css',
@@ -341,7 +341,7 @@ return array(
 				'clientNavigation' => true
 			)
 		),
-		'textdomain' => 'sagiriswd',
+		'textdomain' => 'tessenav-rich-submenus',
 		'editorScript' => 'file:./index.js',
 		'editorStyle' => 'file:./index.css',
 		'style' => 'file:./style-index.css',

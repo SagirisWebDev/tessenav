@@ -12,13 +12,13 @@ import { Modal, Button } from '@wordpress/components';
 export function UpsellModal( { upgradeUrl, onClose } ) {
 	return (
 		<Modal
-			title={ __( 'Upgrade to TesseNav Premium', 'tessenav' ) }
+			title={ __( 'Upgrade to TesseNav Premium', 'tessenav-rich-submenus' ) }
 			onRequestClose={ onClose }
 		>
 			<p>
 				{ __(
 					'The free tier supports up to 3 top-level submenus. Upgrade to TesseNav Premium to add unlimited top-level submenus and unlock all features.',
-					'tessenav'
+					'tessenav-rich-submenus'
 				) }
 			</p>
 			<div style={ { display: 'flex', gap: '8px', marginTop: '16px' } }>
@@ -28,10 +28,10 @@ export function UpsellModal( { upgradeUrl, onClose } ) {
 					target="_blank"
 					rel="noopener noreferrer"
 				>
-					{ __( 'Upgrade to Premium', 'tessenav' ) }
+					{ __( 'Upgrade to Premium', 'tessenav-rich-submenus' ) }
 				</Button>
 				<Button variant="secondary" onClick={ onClose }>
-					{ __( 'Dismiss', 'tessenav' ) }
+					{ __( 'Dismiss', 'tessenav-rich-submenus' ) }
 				</Button>
 			</div>
 		</Modal>

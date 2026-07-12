@@ -1,4 +1,4 @@
-=== Mega Menu for Navigation Block — TesseNav ===
+=== TesseNav — Rich Submenus for the Navigation Block ===
 Contributors:      sagirisdev
 Tags:              navigation, menu, mega-menu, submenus, drill-down
 Requires at least: 6.7
@@ -8,11 +8,11 @@ Stable tag:        0.1.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
-Build navigation with rich submenus — text, media, columns, and any layout block inside the WordPress Navigation block.
+Build mega menus and rich submenus — text, media, columns, and any layout block — inside the WordPress Navigation block.
 
 == Description ==
 
-TesseNav extends the core Navigation block with a Submenu block that can hold any other block: paragraphs, headings, images, columns, groups, lists, buttons — anything in your block library. Build mega-menus, product showcases, contact panels, or simple grouped links, all directly inside the Site Editor.
+TesseNav extends the core Navigation block with a Submenu block that can hold any other block: paragraphs, headings, images, columns, groups, lists, buttons — anything in your block library. Build mega menus, product showcases, contact panels, or simple grouped links, all directly inside the Site Editor.
 
 = Core capabilities (free) =
 
@@ -30,9 +30,13 @@ Premium unlocks unlimited top-level submenus per Navigation block, plus future P
 
 TesseNav is a block-editor plugin. It requires WordPress 6.7+ and works with any block theme. It does not modify the classic Navigation Menus admin screen.
 
+= Source code & build tools =
+
+TesseNav's editor and front-end assets are compiled from source with @wordpress/scripts (webpack). The complete uncompiled source code and the build tooling are publicly available and maintained at the plugin's development repository: https://github.com/SagirisWebDev/tessenav
+
 == Installation ==
 
-1. Upload the plugin files to the `/wp-content/plugins/tessenav` directory, or install through the WordPress plugins screen.
+1. Upload the plugin files to the `/wp-content/plugins/tessenav-rich-submenus` directory, or install through the WordPress plugins screen.
 2. Activate the plugin through the **Plugins** screen in WordPress.
 3. Edit any page or template, insert a **Navigation** block, then insert a **TesseNav Submenu** inside it.
 4. Add any blocks you like inside the submenu — paragraphs, images, columns, anything.

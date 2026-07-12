@@ -1,14 +1,14 @@
 <?php
 /**
- * Plugin Name:       TesseNav
- * Description:       Build navigation with rich submenus — text, media, columns, and any layout block inside the WordPress Navigation block.
+ * Plugin Name:       TesseNav — Rich Submenus for the Navigation Block
+ * Description:       Build mega menus and rich submenus — text, media, columns, and any layout block — inside the WordPress Navigation block.
  * Version:           0.1.0
  * Requires at least: 6.7
  * Requires PHP:      7.4
  * Author:            Sagiris Web Development
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       tessenav
+ * Text Domain:       tessenav-rich-submenus
  *
  * @package Sagiriswd
  */
@@ -251,7 +251,7 @@ function sagiriswd_tessenav_grace_period_admin_notice() {
 	$days     = $status['graceDaysRemaining'];
 	$days_str = sprintf(
 		/* translators: %d: number of days remaining */
-		_n( '%d day', '%d days', $days, 'tessenav' ),
+		_n( '%d day', '%d days', $days, 'tessenav-rich-submenus' ),
 		$days
 	);
 	$upgrade_url = esc_url( TESSENAV_UPGRADE_URL );
@@ -261,7 +261,7 @@ function sagiriswd_tessenav_grace_period_admin_notice() {
 		wp_kses(
 			sprintf(
 				/* translators: 1: days remaining string, 2: upgrade URL */
-				__( 'TesseNav: your premium grace period expires in %1$s. <a href="%2$s">Upgrade now</a> to keep all features.', 'tessenav' ),
+				__( 'TesseNav: your premium grace period expires in %1$s. <a href="%2$s">Upgrade now</a> to keep all features.', 'tessenav-rich-submenus' ),
 				$days_str,
 				$upgrade_url
 			),
@@ -474,7 +474,7 @@ function sagiriswd_tessenav_individual_key_notice() {
 		wp_kses(
 			sprintf(
 				/* translators: %s: URL to TesseNav license settings */
-				__( '<strong>TesseNav:</strong> Your individual license key is active and still being billed separately from your bundle. You can use it on another domain. <a href="%s">Manage your individual license</a>.', 'tessenav' ),
+				__( '<strong>TesseNav:</strong> Your individual license key is active and still being billed separately from your bundle. You can use it on another domain. <a href="%s">Manage your individual license</a>.', 'tessenav-rich-submenus' ),
 				esc_url( $manage_url )
 			),
 			array(

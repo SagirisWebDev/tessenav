@@ -111,7 +111,7 @@ function withTessenavGate( BlockListBlock ) {
 						{ className: 'screen-reader-text' },
 						__(
 							'Hidden on your live site — upgrade TesseNav to display this submenu.',
-							'tessenav'
+							'tessenav-rich-submenus'
 						)
 				  )
 				: null,
